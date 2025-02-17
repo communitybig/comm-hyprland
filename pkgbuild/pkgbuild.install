@@ -1,12 +1,18 @@
-# Installation file for Arch Linux packages
-
 post_install() {
     echo "Configuring comm-hyprland after installation..."
 
+    if [ -n "$SUDO_USER" ]; then
+        REAL_USER="$SUDO_USER"
+    else
+        REAL_USER="$(logname 2>/dev/null || whoami)"
+    fi
+
+    echo "Detected user: $REAL_USER"
+
     if [ -x "/usr/lib/ml4w-hyprland-setup" ]; then
-        /usr/lib/ml4w-hyprland-setup -p arch
+        sudo -u "$REAL_USER" /usr/lib/ml4w-hyprland-setup -p arch
     elif command -v ml4w-hyprland-setup &>/dev/null; then
-        ml4w-hyprland-setup -p arch
+        sudo -u "$REAL_USER" ml4w-hyprland-setup -p arch
     else
         echo "ERROR: ml4w-hyprland-setup not found!"
     fi
