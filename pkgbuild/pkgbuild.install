@@ -3,12 +3,12 @@
 post_install() {
     echo "Configuring comm-hyprland after installation..."
 
-    # Verifica se a dependência ml4w-hyprland está instalada
-    if pacman -Q ml4w-hyprland &>/dev/null; then
-        echo "Executing ml4w-hyprland-setup..."
+    if [ -x "/usr/lib/ml4w-hyprland-setup" ]; then
+        /usr/lib/ml4w-hyprland-setup -p arch
+    elif command -v ml4w-hyprland-setup &>/dev/null; then
         ml4w-hyprland-setup -p arch
     else
-        echo "Warning: ml4w-hyprland is not installed. Skipping ml4w-hyprland-setup execution."
+        echo "ERROR: ml4w-hyprland-setup not found!"
     fi
 }
 
