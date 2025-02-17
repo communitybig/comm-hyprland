@@ -1,21 +1,20 @@
 post_install() {
     echo "Configuring comm-hyprland after installation..."
 
+    # Obtém o usuário real caso esteja rodando como root
     if [ -n "$SUDO_USER" ]; then
         REAL_USER="$SUDO_USER"
+        REAL_HOME=$(eval echo ~"$REAL_USER")
     else
         REAL_USER="$(logname 2>/dev/null || whoami)"
+        REAL_HOME=$(eval echo ~"$REAL_USER")
     fi
 
     echo "Detected user: $REAL_USER"
+    echo "Detected home: $REAL_HOME"
 
-    #if [ -x "/usr/lib/ml4w-hyprland-setup" ]; then
-    #    sudo -u "$REAL_USER" /usr/lib/ml4w-hyprland-setup -p arch
-    #elif command -v ml4w-hyprland-setup &>/dev/null; then
-    #    sudo -u "$REAL_USER" ml4w-hyprland-setup -p arch
-    #else
-    #    echo "ERROR: ml4w-hyprland-setup not found!"
-    #fi
+    # Executa o script como o usuário correto, garantindo as variáveis de ambiente corretas
+    sudo -u "$REAL_USER" env HOME="$REAL_HOME" XDG_CONFIG_HOME="$REAL_HOME/.config" /usr/lib/ml4w-hyprland-setup -p arch
 }
 
 post_upgrade() {
