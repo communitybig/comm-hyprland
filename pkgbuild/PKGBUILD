@@ -11,6 +11,16 @@ depends=(
     'python-gobject'
     'python-screeninfo'
     'python-pywal'
+    'hyprpicker'
+    'noto-fonts-emoji'
+    'noto-fonts-cjk'
+    'eza'
+    'xdg-desktop-portal-gtk'
+    'nm-connection-editor'
+    'tumbler'
+    'brightnessctl'
+    'network-manager-applet'
+    'gtk4'
 )
 
 #optdepends=(
