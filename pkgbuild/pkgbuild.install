@@ -16,13 +16,14 @@ post_install() {
     # Caminho correto do script
     SCRIPT_PATH="/usr/bin/ml4w-hyprland-setup"
 
+    # Verifica se o script existe
     if [ ! -x "$SCRIPT_PATH" ]; then
         echo "ERROR: ml4w-hyprland-setup not found at $SCRIPT_PATH"
         exit 1
     fi
 
-    # Executa o script no primeiro TTY disponível
-    sudo -u "$REAL_USER" openvt -c 1 -s -- bash -c "export TERM=linux; exec $SCRIPT_PATH -p arch"
+    # Executa o script em um terminal real usando 'script'
+    sudo -u "$REAL_USER" script -q -c "env TERM=xterm-256color HOME=$REAL_HOME XDG_CONFIG_HOME=$REAL_HOME/.config $SCRIPT_PATH -p arch" /dev/null
 }
 
 post_upgrade() {
