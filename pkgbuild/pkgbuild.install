@@ -9,13 +9,13 @@ post_install() {
 
     echo "Detected user: $REAL_USER"
 
-    if [ -x "/usr/lib/ml4w-hyprland-setup" ]; then
-        sudo -u "$REAL_USER" /usr/lib/ml4w-hyprland-setup -p arch
-    elif command -v ml4w-hyprland-setup &>/dev/null; then
-        sudo -u "$REAL_USER" ml4w-hyprland-setup -p arch
-    else
-        echo "ERROR: ml4w-hyprland-setup not found!"
-    fi
+    #if [ -x "/usr/lib/ml4w-hyprland-setup" ]; then
+    #    sudo -u "$REAL_USER" /usr/lib/ml4w-hyprland-setup -p arch
+    #elif command -v ml4w-hyprland-setup &>/dev/null; then
+    #    sudo -u "$REAL_USER" ml4w-hyprland-setup -p arch
+    #else
+    #    echo "ERROR: ml4w-hyprland-setup not found!"
+    #fi
 }
 
 post_upgrade() {
