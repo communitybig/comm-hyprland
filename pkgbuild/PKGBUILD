@@ -1,4 +1,6 @@
 # Maintainer: Leonardo Berbert <leo4berbert@gmail.com>
+# Contributor: Stephan Raabe
+# Upstream: https://github.com/mylinuxforwork/dotfiles
 
 pkgname=comm-hyprland
 pkgdesc="Package group to install BigHyprland"
