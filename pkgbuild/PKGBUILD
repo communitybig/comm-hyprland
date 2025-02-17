@@ -14,6 +14,7 @@ depends=(
     'hyprpicker'
     'noto-fonts-emoji'
     'noto-fonts-cjk'
+    'noto-fonts-extra'
     'eza'
     'xdg-desktop-portal-gtk'
     'nm-connection-editor'
@@ -21,6 +22,9 @@ depends=(
     'brightnessctl'
     'network-manager-applet'
     'gtk4'
+    'libadwaita'
+    'xclip'
+    'neovim'
 )
 
 #optdepends=(
