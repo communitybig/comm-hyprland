@@ -7,6 +7,10 @@ pkgdesc="Package group to install BigHyprland"
 depends=(
     # Core System
     'ml4w-hyprland'
+    'python-pip'
+    'python-gobject'
+    'python-screeninfo'
+    'python-pywal'
 )
 
 #optdepends=(
