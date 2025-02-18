@@ -5,7 +5,6 @@
 pkgname=comm-hyprland
 pkgdesc="Package group to install BigHyprland"
 depends=(
-    # Core System
     'ml4w-hyprland'
     'fastfetch'
     'xdg-desktop-portal-gtk'

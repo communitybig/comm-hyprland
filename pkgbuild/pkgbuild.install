@@ -1,31 +1,42 @@
+#!/bin/bash
+
+# post_install function: Executed after the package installation.
 post_install() {
-    echo "Configuring comm-hyprland after installation..."
+    # Mensagem indicando a conclusão da instalação.
+    # Message indicating the completion of the installation.
+    echo "The installation of comm-hyprland has been completed."
 
-    # Obtém o usuário real
-    if [ -n "$SUDO_USER" ]; then
-        REAL_USER="$SUDO_USER"
-        REAL_HOME=$(eval echo ~"$REAL_USER")
-    else
-        REAL_USER="$(logname 2>/dev/null || whoami)"
-        REAL_HOME=$(eval echo ~"$REAL_USER")
-    fi
-
-    echo "Detected user: $REAL_USER"
-    echo "Detected home: $REAL_HOME"
-
-    # Caminho correto do script
+    # Defining the path of the original script.
     SCRIPT_PATH="/usr/bin/ml4w-hyprland-setup"
 
-    # Verifica se o script existe
-    if [ ! -x "$SCRIPT_PATH" ]; then
-        echo "ERROR: ml4w-hyprland-setup not found at $SCRIPT_PATH"
-        exit 1
+    # Checking if the original script exists.
+    if [ -f "$SCRIPT_PATH" ]; then
+        # Creating a symbolic link with a simpler name.
+        ln -sf "$SCRIPT_PATH" /usr/bin/hyprland-setup
+    else
+        echo "Error: '$SCRIPT_PATH' not found."
     fi
 
-    # Executa o script em um terminal real usando 'script'
-    sudo -u "$REAL_USER" script -q -c "env TERM=xterm-256color HOME=$REAL_HOME XDG_CONFIG_HOME=$REAL_HOME/.config $SCRIPT_PATH -p arch" /dev/null
+    # Instructions for the user to complete the setup.
+    echo "To complete the setup, please run the following command:"
+    echo ""
+    echo "  hyprland-setup -p arch"
+    echo ""
 }
 
+# post_upgrade function: Executed after the package upgrade.
 post_upgrade() {
+    # Reusing the post_install function for post-upgrade actions.
     post_install
+}
+
+# post_remove function: Executed after the package removal.
+post_remove() {
+    # Checking if the symbolic link exists.
+    if [ -L "/usr/bin/hyprland-setup" ]; then
+        # Removing the symbolic link.
+        rm /usr/bin/hyprland-setup
+        echo "Link simbólico 'hyprland-setup' removido de /usr/bin/."
+        echo "Symbolic link 'hyprland-setup' removed from /usr/bin/."
+    fi
 }
