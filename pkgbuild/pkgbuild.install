@@ -4,7 +4,7 @@ post_install() {
     user=$(logname)
     user_home=$(getent passwd "$user" | cut -d: -f6)
 
-    dotfiles_dir="/etc/hypr/config/dotfiles"
+    dotfiles_dir="$user_home/dotfiles"
 
     # Create a backup directory if it doesn't exist
     mkdir -p "$user_home/.backup"
