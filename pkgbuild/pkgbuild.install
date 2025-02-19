@@ -1,7 +1,7 @@
 post_install() {
     echo "Setting up dotfiles symlinks..."
-
-    user=${USER:-$(logname)}
+    
+    user=$(logname)
     user_home=$(getent passwd "$user" | cut -d: -f6)
 
     dotfiles_dir="/etc/hypr/config/dotfiles"
@@ -10,7 +10,7 @@ post_install() {
     mkdir -p "$user_home/.backup"
 
     # Create symlinks for home directory files
-    for file in .bashrc .gtkrc-2.0 .Xresources .zshrc; do
+    for file in .bashrc .gtkrc-2.0 .Xresources; do
         if [ -e "$user_home/$file" ] && [ ! -L "$user_home/$file" ]; then
             echo "Backing up existing $file..."
             mv "$user_home/$file" "$user_home/.backup/$file"
