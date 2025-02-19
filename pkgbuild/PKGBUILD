@@ -5,6 +5,7 @@
 pkgname=comm-hyprland
 pkgdesc="Package group to install BigHyprland"
 depends=(
+    'comm-wallpapers-hyprland'
     'ml4w-hyprland'
     'fastfetch'
     'xdg-desktop-portal-gtk'

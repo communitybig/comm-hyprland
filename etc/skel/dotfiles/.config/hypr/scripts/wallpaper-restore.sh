@@ -14,7 +14,8 @@
 # Set defaults
 # -----------------------------------------------------
 
-defaultwallpaper="$HOME/wallpaper/default.jpg"
+#defaultwallpaper="$HOME/wallpaper/default.jpg"
+defaultwallpaper="/usr/share/backgrounds/community/animal-hpr-001.jpg"
 cachefile="$HOME/.config/ml4w/cache/current_wallpaper"
 
 # -----------------------------------------------------

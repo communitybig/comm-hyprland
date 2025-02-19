@@ -74,4 +74,8 @@ post_remove() {
     done
 
     echo "Symlinks removed and backups restored successfully for user: $user!"
+    # Incluir este passo apontando
+
+    #wal -i /home/leoberbert/wallpaper/default.jpg
+    wal -i /usr/share/backgrounds/community/animal-hpr-001.jpg
 }
