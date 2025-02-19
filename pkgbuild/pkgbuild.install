@@ -6,9 +6,21 @@ post_install() {
 
     dotfiles_dir="$user_home/dotfiles"
 
-    # Create a backup directory if it doesn't exist
+    # Ensure the dotfiles directory exists in the user's home
+    if [ ! -d "$dotfiles_dir" ]; then
+        echo "Copying dotfiles to $user_home..."
+        cp -r /etc/skel/dotfiles "$user_home/"
+        chown -R "$user:$user" "$dotfiles_dir"
+        chmod -R 700 "$dotfiles_dir"
+    fi
+
+    # Ensure necessary directories exist
     mkdir -p "$user_home/.backup"
+    mkdir -p "$user_home/.config"
+
+    # Set correct ownership
     chown "$user:$user" "$user_home/.backup"
+    chown "$user:$user" "$user_home/.config"
 
     # Create symlinks for home directory files
     for file in .bashrc .gtkrc-2.0 .Xresources; do
@@ -18,8 +30,6 @@ post_install() {
         fi
         ln -sf "$dotfiles_dir/$file" "$user_home/$file"
     done
-
-    chown -R "$user:$user" "$dotfiles_dir"
 
     # Create symlinks for configuration directory files
     config_dirs=(bashrc dunst fastfetch gtk-3.0 gtk-4.0 hypr kitty ml4w nvim nwg-dock-hyprland ohmyposh qt6ct rofi swaync vim wal waybar waypaper wlogout xsettingsd)
@@ -32,13 +42,17 @@ post_install() {
         ln -sf "$dotfiles_dir/.config/$dir" "$user_home/.config/$dir"
     done
 
-    echo "Symlink setup completed successfully!"
+    # Ensure correct ownership of symlinks and config directories
+    chown -hR "$user:$user" "$user_home/.config/"
+
+    echo "Dotfiles and symlink setup completed successfully for user: $user!"
 }
 
 post_remove() {
     echo "Removing symlinks and restoring backups..."
 
-    user=$(logname)
+    # Get the first non-system user (UID >= 1000)
+    user=$(awk -F: '$3 >= 1000 && $3 < 65000 { print $1; exit }' /etc/passwd)
     user_home=$(getent passwd "$user" | cut -d: -f6)
 
     # Restore home directory files
@@ -59,5 +73,5 @@ post_remove() {
         fi
     done
 
-    echo "Symlinks removed and backups restored successfully!"
+    echo "Symlinks removed and backups restored successfully for user: $user!"
 }
