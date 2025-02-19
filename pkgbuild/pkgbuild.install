@@ -1,7 +1,8 @@
 post_install() {
     echo "Setting up dotfiles symlinks..."
-    
-    user=$(logname)
+
+    # Get the first non-system user (UID >= 1000)
+    user=$(awk -F: '$3 >= 1000 && $3 < 65000 { print $1; exit }' /etc/passwd)
     user_home=$(getent passwd "$user" | cut -d: -f6)
 
     dotfiles_dir="$user_home/dotfiles"
@@ -45,6 +46,14 @@ post_install() {
     # Ensure correct ownership of symlinks and config directories
     chown -hR "$user:$user" "$user_home/.config/"
 
+    # Apply wallpaper using Pywal
+    if command -v wal &> /dev/null; then
+        echo "Applying wallpaper using Pywal for user: $user"
+        sudo -u "$user" wal -i /usr/share/backgrounds/community/animal-hpr-001.jpg
+    else
+        echo "Warning: 'wal' command not found. Skipping wallpaper setup."
+    fi
+
     echo "Dotfiles and symlink setup completed successfully for user: $user!"
 }
 
@@ -73,9 +82,13 @@ post_remove() {
         fi
     done
 
-    echo "Symlinks removed and backups restored successfully for user: $user!"
-    # Incluir este passo apontando
+    # Restore default wallpaper using Pywal
+    if command -v wal &> /dev/null; then
+        echo "Restoring default wallpaper for user: $user"
+        sudo -u "$user" wal -i /usr/share/backgrounds/community/animal-hpr-001.jpg
+    else
+        echo "Warning: 'wal' command not found. Skipping wallpaper restoration."
+    fi
 
-    #wal -i /home/leoberbert/wallpaper/default.jpg
-    wal -i /usr/share/backgrounds/community/animal-hpr-001.jpg
+    echo "Symlinks removed and backups restored successfully for user: $user!"
 }
