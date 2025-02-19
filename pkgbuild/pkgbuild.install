@@ -8,6 +8,7 @@ post_install() {
 
     # Create a backup directory if it doesn't exist
     mkdir -p "$user_home/.backup"
+    chown "$user:$user" "$user_home/.backup"
 
     # Create symlinks for home directory files
     for file in .bashrc .gtkrc-2.0 .Xresources; do
@@ -17,6 +18,8 @@ post_install() {
         fi
         ln -sf "$dotfiles_dir/$file" "$user_home/$file"
     done
+
+    chown -R "$user:$user" "$dotfiles_dir"
 
     # Create symlinks for configuration directory files
     config_dirs=(bashrc dunst fastfetch gtk-3.0 gtk-4.0 hypr kitty ml4w nvim nwg-dock-hyprland ohmyposh qt6ct rofi swaync vim wal waybar waypaper wlogout xsettingsd)
@@ -35,7 +38,8 @@ post_install() {
 post_remove() {
     echo "Removing symlinks and restoring backups..."
 
-    user_home=$(getent passwd "$USER" | cut -d: -f6)
+    user=$(logname)
+    user_home=$(getent passwd "$user" | cut -d: -f6)
 
     # Restore home directory files
     for file in .bashrc .gtkrc-2.0 .Xresources .zshrc; do
