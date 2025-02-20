@@ -64,11 +64,12 @@ post_install() {
     flatpak_dir="/etc/skel/dotfiles/flatpak"
 
     # Install local Flatpak applications for the user
+# Install local Flatpak applications for the user
     echo "Installing local Flatpak apps..."
     for app in calendar welcome settings sidebar; do
         flatpak_file="$flatpak_dir/com.ml4w.${app}.flatpak"
         if [ -f "$flatpak_file" ]; then
-            sudo -u "$user" flatpak install --user -y "$flatpak_file"
+            sudo -u "$user" bash -c "flatpak install --user -y '$flatpak_file'"
             echo ":: com.ml4w.${app}.flatpak installed"
         else
             echo "Warning: $flatpak_file not found, skipping..."
@@ -117,6 +118,7 @@ post_remove() {
     if [ -f "$user_home/.bashrc" ]; then
         echo "Reloading .bashrc for user: $user"
         sudo -u "$user" bash -c "source $user_home/.bashrc"
+        
     fi
 
     echo "Symlinks removed, backups restored, and .bashrc reloaded for user: $user!"
