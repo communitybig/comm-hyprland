@@ -71,6 +71,7 @@ depends=(
     'mpv'
     'imv'
     'ffmpegthumbnailer'
+    'wireplumber'
 )
 
 #optdepends=(

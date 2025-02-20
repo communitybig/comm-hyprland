@@ -47,12 +47,12 @@ post_install() {
     chown -hR "$user:$user" "$user_home/.config/"
 
     # Apply wallpaper using Pywal
-    #if command -v wal &> /dev/null; then
-    #    echo "Applying wallpaper using Pywal for user: $user"
-    #    sudo -u "$user" wal -i /usr/share/backgrounds/community/animal-hpr-001.jpg
-    #else
-    #    echo "Warning: 'wal' command not found. Skipping wallpaper setup."
-    #fi
+    if command -v wal &> /dev/null; then
+        echo "Applying wallpaper using Pywal for user: $user"
+        sudo -u "$user" wal -i /usr/share/backgrounds/community/animal-hpr-001.jpg
+    else
+        echo "Warning: 'wal' command not found. Skipping wallpaper setup."
+    fi
 
     echo "Dotfiles and symlink setup completed successfully for user: $user!"
 }
