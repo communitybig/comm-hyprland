@@ -47,12 +47,12 @@ post_install() {
     chown -hR "$user:$user" "$user_home/.config/"
 
     # Apply wallpaper using Pywal
-    if command -v wal &> /dev/null; then
-        echo "Applying wallpaper using Pywal for user: $user"
-        sudo -u "$user" wal -i /usr/share/backgrounds/community/animal-hpr-001.jpg
-    else
-        echo "Warning: 'wal' command not found. Skipping wallpaper setup."
-    fi
+    #if command -v wal &> /dev/null; then
+    #    echo "Applying wallpaper using Pywal for user: $user"
+    #    sudo -u "$user" wal -i /usr/share/backgrounds/community/animal-hpr-001.jpg
+    #else
+    #    echo "Warning: 'wal' command not found. Skipping wallpaper setup."
+    #fi
 
     echo "Dotfiles and symlink setup completed successfully for user: $user!"
 }
@@ -82,13 +82,11 @@ post_remove() {
         fi
     done
 
-    # Restore default wallpaper using Pywal
-    if command -v wal &> /dev/null; then
-        echo "Restoring default wallpaper for user: $user"
-        sudo -u "$user" wal -i /usr/share/backgrounds/community/animal-hpr-001.jpg
-    else
-        echo "Warning: 'wal' command not found. Skipping wallpaper restoration."
+    # Reload .bashrc for the user
+    if [ -f "$user_home/.bashrc" ]; then
+        echo "Reloading .bashrc for user: $user"
+        sudo -u "$user" bash -c "source $user_home/.bashrc"
     fi
 
-    echo "Symlinks removed and backups restored successfully for user: $user!"
+    echo "Symlinks removed, backups restored, and .bashrc reloaded for user: $user!"
 }
