@@ -55,7 +55,38 @@ post_install() {
     fi
 
     echo "Dotfiles and symlink setup completed successfully for user: $user!"
+
+    # Install GNOME Platform runtime globally
+    echo "Installing GNOME Platform runtime..."
+    flatpak install -y org.gnome.Platform/x86_64/47
+
+    # Directory where local Flatpak files are stored
+    flatpak_dir="/etc/skel/dotfiles/flatpak"
+
+    # Install local Flatpak applications for the user
+    echo "Installing local Flatpak apps..."
+    for app in calendar welcome settings sidebar; do
+        flatpak_file="$flatpak_dir/com.ml4w.${app}.flatpak"
+        if [ -f "$flatpak_file" ]; then
+            sudo -u "$user" flatpak install --user -y "$flatpak_file"
+            echo ":: com.ml4w.${app}.flatpak installed"
+        else
+            echo "Warning: $flatpak_file not found, skipping..."
+        fi
+    done
+
+    echo "Flatpak applications installed and launched successfully!"
+
+    # Countdown before reboot
+    echo "Installation and configuration are complete. The system will reboot in 10 seconds to apply the changes..."
+    for i in {10..1}; do
+        echo -ne "Rebooting in $i seconds...\r"
+        sleep 1
+    done
+    echo "Rebooting now!"
+    reboot
 }
+
 
 post_remove() {
     echo "Removing symlinks and restoring backups..."
