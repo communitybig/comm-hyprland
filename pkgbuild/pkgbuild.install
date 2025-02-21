@@ -63,8 +63,16 @@ post_install() {
     # Directory where local Flatpak files are stored
     flatpak_dir="/etc/skel/dotfiles/flatpak"
 
+
+    #Configuring Nautilus...
+    echo "Configuring Nautilus..."
+    if glib-compile-schemas /usr/share/glib-2.0/schemas/; then
+        echo "Nautilus schemas compiled successfully!"
+    else
+        echo "Warning: Failed to compile Nautilus schemas. Some features may not work correctly."
+    fi
+
     # Install local Flatpak applications for the user
-# Install local Flatpak applications for the user
     echo "Installing local Flatpak apps..."
     for app in calendar welcome settings sidebar; do
         flatpak_file="$flatpak_dir/com.ml4w.${app}.flatpak"
@@ -81,7 +89,7 @@ post_install() {
     # Countdown before reboot
     echo "Installation and configuration are complete. The system will reboot in 10 seconds to apply the changes..."
     for i in {10..1}; do
-        echo -ne "Rebooting in $i seconds...\r"
+        echo -n "$i..."
         sleep 1
     done
     echo "Rebooting now!"
