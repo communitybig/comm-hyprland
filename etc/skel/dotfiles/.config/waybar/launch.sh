@@ -15,7 +15,8 @@ sleep 0.5
 # -----------------------------------------------------
 # Default theme: /THEMEFOLDER;/VARIATION
 # -----------------------------------------------------
-themestyle="/ml4w-modern;/ml4w-modern/light"
+#themestyle="/ml4w-modern;/ml4w-modern/light"
+themestyle="/ml4w-minimal;/ml4w-minimal"
 
 # -----------------------------------------------------
 # Get current theme information from ~/.config/ml4w/settings/waybar-theme.sh
