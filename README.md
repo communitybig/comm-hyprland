@@ -2,11 +2,8 @@
 
 **A complete Hyprland setup with custom configurations and keybindings.**  
 
-![alt text](image-2.png)
+![image](https://github.com/user-attachments/assets/eb589f2f-259c-4fad-a1ed-99ab5af4f3a4)
 
-![alt text](image.png)
-
-![alt text](image-1.png)
 
 ## About  
 
