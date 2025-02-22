@@ -24,7 +24,7 @@ This package is designed for users who want a **ready-to-use Hyprland environmen
 
 ### Installation via `pacman`  
 ```sh
-sudo pacman -S comm-hyprland
+sudo pacman -Sy comm-hyprland
 ```
 
 ## Credits  
