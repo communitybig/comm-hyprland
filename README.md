@@ -23,6 +23,47 @@
 This package is designed for users who want a **ready-to-use Hyprland environment** with a smooth experience.
 
 ### Installation via `pacman`  
+
+As the project is still in the testing phase, it will be necessary to use the test repository.
+
+Edit the **`/etc/pacman.conf`** file:
+```sh
+sudo nano /etc/pacman.conf
+```
+or 
+
+```sh
+sudo vim /etc/pacman.conf
+```
+Add the line below in the file.
+
+```
+[community-testing]
+SigLevel = PackageRequired
+Server = https://repo.communitybig.org/testing/$arch
+```
+The file repositories must be in the following order.
+```
+[community-testing]
+SigLevel = PackageRequired
+Server = https://repo.communitybig.org/testing/$arch
+
+[community-stable]
+SigLevel = PackageRequired
+Server = https://repo.communitybig.org/stable/$arch
+
+[community-extra]
+SigLevel = PackageRequired
+Server = https://repo.communitybig.org/extra/$arch
+
+[biglinux-stable]
+SigLevel = PackageRequired
+Server = https://repo.biglinux.com.br/stable/$arch
+
+```
+
+Now just run the command below for installation.
+
 ```sh
 sudo pacman -Sy comm-hyprland
 ```
