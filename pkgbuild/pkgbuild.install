@@ -1,13 +1,30 @@
 post_install() {
-    echo "Setting up dotfiles symlinks..."
+    echo "Initializing system configuration..."
 
-    # Get the first non-system user (UID >= 1000)
+    # Enable SDDM
+    echo "Enabling SDDM..."
+    systemctl enable sddm
+
+    # Create the 'sddm' user if it doesn't exist
+    if ! id "sddm" &>/dev/null; then
+        echo "Creating SDDM user..."
+        useradd -r -s /usr/bin/nologin -M -d /var/lib/sddm sddm
+    else
+        echo "SDDM user already exists, skipping creation."
+    fi
+
+    # Ensure SDDM directory exists with correct permissions
+    echo "Setting up SDDM directory..."
+    mkdir -p /var/lib/sddm
+    chown -R sddm:sddm /var/lib/sddm
+
+    # Configure dotfiles and user settings
+    echo "Setting up dotfiles symlinks..."
     user=$(awk -F: '$3 >= 1000 && $3 < 65000 { print $1; exit }' /etc/passwd)
     user_home=$(getent passwd "$user" | cut -d: -f6)
-
     dotfiles_dir="$user_home/dotfiles"
 
-    # Ensure the dotfiles directory exists in the user's home
+    # Copy dotfiles if they don't exist
     if [ ! -d "$dotfiles_dir" ]; then
         echo "Copying dotfiles to $user_home..."
         cp -r /etc/skel/dotfiles "$user_home/"
@@ -16,12 +33,8 @@ post_install() {
     fi
 
     # Ensure necessary directories exist
-    mkdir -p "$user_home/.backup"
-    mkdir -p "$user_home/.config"
-
-    # Set correct ownership
-    chown "$user:$user" "$user_home/.backup"
-    chown "$user:$user" "$user_home/.config"
+    mkdir -p "$user_home/.backup" "$user_home/.config"
+    chown "$user:$user" "$user_home/.backup" "$user_home/.config"
 
     # Create symlinks for home directory files
     for file in .bashrc .gtkrc-2.0 .Xresources; do
@@ -31,10 +44,11 @@ post_install() {
         fi
         ln -sf "$dotfiles_dir/$file" "$user_home/$file"
     done
+    
+    chown -h "$user:$user" "$user_home/.gtkrc-2.0" "$user_home/.Xresources"
 
-    # Create symlinks for configuration directory files
+    # Create symlinks for configuration directories
     config_dirs=(bashrc dunst fastfetch gtk-3.0 gtk-4.0 hypr kitty ml4w nvim nwg-dock-hyprland ohmyposh qt6ct rofi swaync vim wal waybar waypaper wlogout xsettingsd)
-
     for dir in "${config_dirs[@]}"; do
         if [ -e "$user_home/.config/$dir" ] && [ ! -L "$user_home/.config/$dir" ]; then
             echo "Backing up existing ~/.config/$dir..."
@@ -43,28 +57,21 @@ post_install() {
         ln -sf "$dotfiles_dir/.config/$dir" "$user_home/.config/$dir"
     done
 
-    # Ensure correct ownership of symlinks and config directories
     chown -hR "$user:$user" "$user_home/.config/"
 
     # Apply wallpaper using Pywal
-    if command -v wal &> /dev/null; then
+    if command -v wal &>/dev/null; then
         echo "Applying wallpaper using Pywal for user: $user"
         sudo -u "$user" wal -i /usr/share/backgrounds/community/animal-hpr-001.jpg
     else
         echo "Warning: 'wal' command not found. Skipping wallpaper setup."
     fi
 
-    echo "Dotfiles and symlink setup completed successfully for user: $user!"
-
     # Install GNOME Platform runtime globally
     echo "Installing GNOME Platform runtime..."
     flatpak install -y org.gnome.Platform/x86_64/47
 
-    # Directory where local Flatpak files are stored
-    flatpak_dir="/etc/skel/dotfiles/flatpak"
-
-
-    #Configuring Nautilus...
+    # Configure Nautilus
     echo "Configuring Nautilus..."
     if glib-compile-schemas /usr/share/glib-2.0/schemas/; then
         echo "Nautilus schemas compiled successfully!"
@@ -72,8 +79,9 @@ post_install() {
         echo "Warning: Failed to compile Nautilus schemas. Some features may not work correctly."
     fi
 
-    # Install local Flatpak applications for the user
+    # Install local Flatpak applications
     echo "Installing local Flatpak apps..."
+    flatpak_dir="/etc/skel/dotfiles/flatpak"
     for app in calendar welcome settings sidebar; do
         flatpak_file="$flatpak_dir/com.ml4w.${app}.flatpak"
         if [ -f "$flatpak_file" ]; then
@@ -84,23 +92,20 @@ post_install() {
         fi
     done
 
-    echo "Flatpak applications installed and launched successfully!"
+    echo "Flatpak applications installed successfully!"
 
     # Countdown before reboot
-    echo "Installation and configuration are complete. The system will reboot in 10 seconds to apply the changes..."
+    echo "Installation complete. Rebooting in 10 seconds..."
     for i in {10..1}; do
         echo -n "$i..."
         sleep 1
     done
-    echo "Rebooting now!"
+    echo " Now!"
     reboot
 }
 
-
 post_remove() {
     echo "Removing symlinks and restoring backups..."
-
-    # Get the first non-system user (UID >= 1000)
     user=$(awk -F: '$3 >= 1000 && $3 < 65000 { print $1; exit }' /etc/passwd)
     user_home=$(getent passwd "$user" | cut -d: -f6)
 
@@ -112,9 +117,8 @@ post_remove() {
         fi
     done
 
-    # Restore configuration directory files
+    # Restore configuration directories
     config_dirs=(bashrc dunst fastfetch gtk-3.0 gtk-4.0 hypr kitty ml4w nvim nwg-dock-hyprland ohmyposh qt6ct rofi swaync vim wal waybar waypaper wlogout xsettingsd)
-
     for dir in "${config_dirs[@]}"; do
         if [ -L "$user_home/.config/$dir" ]; then
             rm "$user_home/.config/$dir"
@@ -126,7 +130,6 @@ post_remove() {
     if [ -f "$user_home/.bashrc" ]; then
         echo "Reloading .bashrc for user: $user"
         sudo -u "$user" bash -c "source $user_home/.bashrc"
-        
     fi
 
     echo "Symlinks removed, backups restored, and .bashrc reloaded for user: $user!"
