@@ -60,7 +60,7 @@ depends=(
     'ttf-dejavu'
     'nwg-dock-hyprland'
     'oh-my-posh-bin'
-    #'checkupdates-with-aur'
+    'checkupdates-with-aur'
     'loupe'
     'firefox'
     'nautilus'
