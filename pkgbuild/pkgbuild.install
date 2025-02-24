@@ -11,7 +11,7 @@ post_install() {
         echo "NVIDIA detected! Installing drivers..."
         
         # Detect the currently installed kernel
-        KERNEL_VERSION=$(uname -r | cut -d '-' -f1,2)
+        KERNEL_VERSION=$(uname -r | cut -d '.' -f1,2)
         KERNEL_PACKAGE="linux${KERNEL_VERSION//./}-nvidia"
 
         echo "Detected kernel: $KERNEL_VERSION"
