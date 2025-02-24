@@ -2,7 +2,7 @@ post_install() {
     echo "Initializing system configuration..."
 
     echo "Detecting GPU and installing appropriate drivers..."
-
+    read
     # Detect whether the GPU is NVIDIA, Intel, or AMD
     if lspci | grep -qi "vga.*nvidia"; then
         echo "NVIDIA detected! Installing drivers..."
