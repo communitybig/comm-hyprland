@@ -85,6 +85,19 @@ depends=(
     'manjaro-pipewire'
     'libsndfile'
     'lib32-libsndfile'    
+    # Fix Bar'
+    'xf86-input-elographics'
+    'xf86-input-evdev'
+    'xf86-input-libinput'
+    'xf86-input-vmmouse'
+    'xf86-input-void'
+    'timeshift'
+    'mhwd'
+    'mhwd-db'
+    'umc'
+    'libxcvt'
+    'b43-fwcutter'
+    'base-devel'
 )
 
 #optdepends=(
