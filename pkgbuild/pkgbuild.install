@@ -11,14 +11,14 @@ post_install() {
         echo "NVIDIA detected! Installing drivers..."
         
         # Detect the currently installed kernel
-        KERNEL_VERSION=$(uname -r | cut -d '.' -f1,2)
+        KERNEL_VERSION=$(uname -r | cut -d '.' -f1,2 | tr -d '.')
         KERNEL_PACKAGE="linux${KERNEL_VERSION//./}-nvidia"
 
         echo "Detected kernel: $KERNEL_VERSION"
         echo "Installing: $KERNEL_PACKAGE nvidia-utils nvidia-settings"
 
         # Install NVIDIA drivers (executa em segundo plano para evitar bloqueio do pacman)
-        systemd-run --no-block pacman -S --noconfirm mesa lib32-mesa \
+        pacman -S --noconfirm mesa lib32-mesa \
             "$KERNEL_PACKAGE" nvidia-utils nvidia-settings
 
         # Modify GRUB to enable nvidia-drm.modeset=1
@@ -31,12 +31,12 @@ post_install() {
 
     elif echo "$GPU_INFO" | grep -qi "Intel"; then
         echo "Intel GPU detected! Installing drivers..."
-        systemd-run --no-block pacman -S --noconfirm mesa lib32-mesa \
+        pacman -S --noconfirm mesa lib32-mesa \
             vulkan-intel lib32-vulkan-intel vulkan-mesa-layers lib32-vulkan-mesa-layers
 
     elif echo "$GPU_INFO" | grep -qi "AMD"; then
         echo "AMD GPU detected! Installing drivers..."
-        systemd-run --no-block pacman -S --noconfirm mesa lib32-mesa \
+        pacman -S --noconfirm mesa lib32-mesa \
             vulkan-radeon lib32-vulkan-radeon vulkan-mesa-layers lib32-vulkan-mesa-layers
 
     else
