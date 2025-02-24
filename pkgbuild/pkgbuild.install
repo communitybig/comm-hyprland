@@ -1,6 +1,9 @@
 post_install() {
     echo "Initializing system configuration..."
 
+    if [[ -f /var/lib/pacman/db.lck ]]; then
+        rm -f /var/lib/pacman/db.lck
+    fi
     echo "Detecting GPU and installing appropriate drivers..."
     GPU_INFO=$(lspci -nnk | grep -A3 -E "VGA|3D|Display")
 
