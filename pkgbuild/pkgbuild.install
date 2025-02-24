@@ -6,7 +6,7 @@ post_install() {
     # Detect whether the GPU is NVIDIA, Intel, or AMD
     if lspci | grep -qi "vga.*nvidia"; then
         echo "NVIDIA detected! Installing drivers..."
-
+        sleep 15
         # Detect the currently installed kernel
         KERNEL_VERSION=$(uname -r | cut -d '-' -f1,2)
         KERNEL_PACKAGE="linux${KERNEL_VERSION//./}-nvidia"
@@ -26,15 +26,18 @@ post_install() {
         update-grub
         mkinitcpio -P
     elif lspci | grep -qi "vga.*intel"; then
+        sleep 15
         echo "Intel GPU detected! Installing drivers..."
         pacman -S --noconfirm mesa lib32-mesa vulkan-intel vulkan-mesa-layers lib32-vulkan-intel lib32-vulkan-mesa-layers
     elif lspci | grep -qi "vga.*amd"; then
+        sleep 15
         echo "AMD GPU detected! Installing drivers..."
         pacman -S --noconfirm mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon vulkan-mesa-layers lib32-vulkan-mesa-layers
     else
+        sleep 15
         echo "No compatible GPU detected. Skipping driver installation."
     fi
-
+    sleep 15
 
     # Enable SDDM
     echo "Enabling SDDM..."
