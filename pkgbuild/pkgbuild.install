@@ -1,6 +1,41 @@
 post_install() {
     echo "Initializing system configuration..."
 
+    echo "Detecting GPU and installing appropriate drivers..."
+
+    # Detect whether the GPU is NVIDIA, Intel, or AMD
+    if lspci | grep -qi "vga.*nvidia"; then
+        echo "NVIDIA detected! Installing drivers..."
+
+        # Detect the currently installed kernel
+        KERNEL_VERSION=$(uname -r | cut -d '-' -f1,2)
+        KERNEL_PACKAGE="linux${KERNEL_VERSION//./}-nvidia"
+
+        echo "Detected kernel: $KERNEL_VERSION"
+        echo "Installing: $KERNEL_PACKAGE nvidia-utils nvidia-settings"
+
+        # Install the NVIDIA driver compatible with the current kernel
+        pacman -S --noconfirm mesa lib32-mesa vulkan-intel vulkan-mesa-layers lib32-vulkan-intel lib32-vulkan-mesa-layers
+        pacman -S --noconfirm "$KERNEL_PACKAGE" nvidia-utils nvidia-settings
+
+        # Modify GRUB to enable nvidia-drm.modeset=1
+        echo "Modifying GRUB to enable nvidia-drm.modeset=1..."
+        sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& nvidia-drm.modeset=1/' /etc/default/grub
+
+        # Update GRUB and regenerate initramfs
+        update-grub
+        mkinitcpio -P
+    elif lspci | grep -qi "vga.*intel"; then
+        echo "Intel GPU detected! Installing drivers..."
+        pacman -S --noconfirm mesa lib32-mesa vulkan-intel vulkan-mesa-layers lib32-vulkan-intel lib32-vulkan-mesa-layers
+    elif lspci | grep -qi "vga.*amd"; then
+        echo "AMD GPU detected! Installing drivers..."
+        pacman -S --noconfirm mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon vulkan-mesa-layers lib32-vulkan-mesa-layers
+    else
+        echo "No compatible GPU detected. Skipping driver installation."
+    fi
+
+
     # Enable SDDM
     echo "Enabling SDDM..."
     systemctl enable sddm

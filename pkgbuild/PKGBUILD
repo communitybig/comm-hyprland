@@ -36,7 +36,7 @@ depends=(
     'qt6ct'
     'waybar'
     'rofi-wayland'
-    'polkit-gnome'
+    #'polkit-gnome'
     'zsh'
     'zsh-completions'
     'fzf'
@@ -76,6 +76,15 @@ depends=(
     'qt5-svg'
     'qt5-graphicaleffects'
     'qt5-quickcontrols2'
+    # Audio Dependencies
+    'biglinux-meta-audio-config'
+    'portaudio'
+    'lib32-portaudio'
+    'pipewire-alsa'
+    'pipewire-pulse'
+    'manjaro-pipewire'
+    'libsndfile'
+    'lib32-libsndfile'    
 )
 
 #optdepends=(
