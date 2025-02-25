@@ -1,0 +1,10 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = comm-hyprland
+
+[Action]
+Description = Installing webkit2gtk-4.1 before comm-hyprland...
+When = PreTransaction
+Exec = /usr/bin/pacman -S --noconfirm --needed webkit2gtk-4.1
