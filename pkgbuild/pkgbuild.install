@@ -139,7 +139,7 @@ post_install() {
     echo "Flatpak applications installed successfully!"
     
     #Testing dock
-    update-mime-database /usr/share/mime
+    #update-mime-database /usr/share/mime
     
     # Countdown before reboot
 
