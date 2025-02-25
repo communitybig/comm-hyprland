@@ -19,15 +19,19 @@ post_install() {
         echo "Detected kernel: $KERNEL_VERSION"
         echo "Installing: $KERNEL_PACKAGE nvidia-utils nvidia-settings"
 
-        # Install NVIDIA drivers (executa em segundo plano para evitar bloqueio do pacman)
+        # Install NVIDIA drivers 
         pacman -S --noconfirm mesa lib32-mesa \
             "$KERNEL_PACKAGE" nvidia-utils nvidia-settings
+
+        # Blacklist  driver nouveau
+        echo "Blacklisting Nouveau..."
+        echo "blacklist nouveau" | tee /etc/modprobe.d/nouveau.conf
+        echo "install nouveau /bin/true" | tee -a /etc/modprobe.d/blacklist.conf
 
         # Modify GRUB to enable nvidia-drm.modeset=1
         echo "Modifying GRUB to enable nvidia-drm.modeset=1..."
         sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& nvidia-drm.modeset=1/' /etc/default/grub
 
-        # Atualiza o GRUB e recria o initramfs (esses comandos devem rodar direto, sem `systemd-run`)
         update-grub
         mkinitcpio -P
 
@@ -40,6 +44,12 @@ post_install() {
         echo "AMD GPU detected! Installing drivers..."
         pacman -S --noconfirm mesa lib32-mesa \
             vulkan-radeon lib32-vulkan-radeon vulkan-mesa-layers lib32-vulkan-mesa-layers mhwd-amdgpu xf86-video-amdgpu
+        
+        echo "Modifying GRUB to enable amdgpu.modeset=1..."
+        sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& amdgpu.modeset=1/' /etc/default/grub
+
+        update-grub
+        mkinitcpio -P
 
     else
         echo "No compatible GPU detected. Skipping driver installation."
@@ -144,9 +154,8 @@ post_install() {
     printf "%d..." "$i"
         sleep 1  
     done
- echo " Now!"  reboot
+ echo " Now! reboot ..."
  reboot
-
 }
 
 post_remove() {
