@@ -5,6 +5,7 @@
 pkgname=comm-hyprland
 pkgdesc="Package group to install BigHyprland"
 depends=(
+    'go'    
     'base-devel'
     'comm-wallpapers-hyprland'
     'ml4w-hyprland'
@@ -111,8 +112,6 @@ depends=(
     'lsof'
     'ncdu'
     'sysstat'
-    'webkit2gtk-4.1'
-    'go'
 )
 
 #optdepends=(
@@ -138,6 +137,14 @@ elif [ -e "pkgbuild.install" ]; then
     install=pkgbuild.install
 fi
 
+prepare() {
+
+    if [[ -f /var/lib/pacman/db.lck ]]; then
+        rm -f /var/lib/pacman/db.lck
+    fi
+    echo "Instalando webkit2gtk-4.1 antes de tudo..."
+    pacman -S --noconfirm --needed webkit2gtk-4.1
+}
 package() {
     cd "${srcdir}/${pkgname}"
 

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+pre_install() {
+    echo "Instalando webkit2gtk-4.1 antes do restante..."
+    pacman -S --noconfirm --needed webkit2gtk-4.1
+}
 
 post_install() {
     echo "Initializing system configuration..."
