@@ -5,6 +5,7 @@
 pkgname=comm-hyprland
 pkgdesc="Package group to install BigHyprland"
 depends=(
+    'base-devel'
     'comm-wallpapers-hyprland'
     'ml4w-hyprland'
     'fastfetch'
@@ -96,8 +97,39 @@ depends=(
     'umc'
     'libxcvt'
     'b43-fwcutter'
-    'base-devel'
     'glxinfo'
+    # Add
+    'clang'
+    'compiler-rt'
+    'gnu-free-fonts'
+    'grc'
+    'grc-rs'
+    'harfbuzz-icu'
+    'hyphen'
+    'inotify-tools'
+    'inxi'
+    'libavif'
+    'libmanette'
+    'libpaper'
+    'libpipeline'
+    'libyuv'
+    'llvm'
+    'lsof'
+    'minizip'
+    'ncdu'
+    'pyside6'
+    'python-cheroot'
+    'python-multipart'
+    'python-setproctitle'
+    'python-six'
+    'qpdf'
+    'qt6-positioning'
+    'qt6-webchannel'
+    'qt6-webengine'
+    'shiboken6'
+    'sysstat'
+    'webkit2gtk'
+    'woff2'
 )
 
 #optdepends=(

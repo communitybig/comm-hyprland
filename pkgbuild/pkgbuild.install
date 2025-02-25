@@ -178,3 +178,7 @@ post_remove() {
 
     echo "Symlinks removed, backups restored, and .bashrc reloaded for user: $user!"
 }
+
+post_upgrade() {
+    post_install
+}
