@@ -139,6 +139,7 @@ elif [ -e "pkgbuild.install" ]; then
 fi
 
 package() {
+    
     cd "${srcdir}/${pkgname}"
 
     # Determine the correct source directory

@@ -137,15 +137,7 @@ post_install() {
     done
 
     echo "Flatpak applications installed successfully!"
-    
-    #Fixing polkit-1
-    echo "Merging big-polkit-1 into polkit-1..."
-    if [[ -f /etc/pam.d/big-polkit-1 ]]; then
-        cat /etc/pam.d/big-polkit-1 > /etc/pam.d/polkit-1
-        echo "polkit-1 updated successfully."
-    else
-        echo "Warning: /etc/pam.d/big-polkit-1 not found. Skipping merge."
-    fi
+
 # Countdown before reboot  echo "Installation complete. Rebooting in 10 seconds..."
  echo "Installation complete. Rebooting in 10 seconds..."
   for i in $(seq 10 -1 1); do    
