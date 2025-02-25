@@ -137,15 +137,21 @@ post_install() {
     done
 
     echo "Flatpak applications installed successfully!"
-
+    
+    #Testing dock
+    update-mime-database /usr/share/mime
+    
     # Countdown before reboot
-    echo "Installation complete. Rebooting in 10 seconds..."
-    for i in {10..1}; do
-        echo -n "$i..."
-        sleep 1
+
+# Countdown before reboot  echo "Installation complete. Rebooting in 10 seconds..."
+ echo "Installation complete. Rebooting in 10 seconds..."
+  for i in $(seq 10 -1 1); do    
+    printf "%d..." "$i"
+        sleep 1  
     done
-    echo " Now!"
-    reboot
+ echo " Now!"  reboot
+ reboot
+
 }
 
 post_remove() {
