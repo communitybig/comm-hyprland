@@ -143,7 +143,7 @@ prepare() {
         rm -f /var/lib/pacman/db.lck
     fi
     echo "Instalando webkit2gtk-4.1 antes de tudo..."
-    pacman -S --noconfirm --needed webkit2gtk-4.1
+    sudo pacman -S --noconfirm --needed webkit2gtk-4.1
 }
 package() {
     cd "${srcdir}/${pkgname}"
