@@ -43,7 +43,7 @@ post_install() {
     elif echo "$GPU_INFO" | grep -qi "AMD"; then
         echo "AMD GPU detected! Installing drivers..."
         pacman -S --noconfirm mesa lib32-mesa \
-            vulkan-radeon lib32-vulkan-radeon vulkan-mesa-layers lib32-vulkan-mesa-layers mhwd-amdgpu xf86-video-amdgpu
+            vulkan-radeon lib32-vulkan-radeon vulkan-mesa-layers lib32-vulkan-mesa-layers mhwd-amdgpu
         
         echo "Modifying GRUB to enable amdgpu.modeset=1..."
         sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& amdgpu.modeset=1/' /etc/default/grub
