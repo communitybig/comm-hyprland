@@ -1,188 +1,229 @@
 #!/usr/bin/env bash
+# -*- coding: utf-8 -*-
+
+export TERM=${TERM:-xterm}
+export TERM=${TERM:-xterm-256color}
+
+# Definindo variáveis de cores (somente em negrito)
+export black="\033[1;30m"
+export red="\033[1;31m"
+export green="\033[1;32m"
+export yellow="\033[1;33m"
+export blue="\033[1;34m"
+export magenta="\033[1;35m"
+export cyan="\033[1;36m"
+export white="\033[1;37m"
+
+# Definindo variáveis para negrito e reset
+export bold="\033[1m"
+export reset="\033[0m"
+
+msg() {
+	local msg="$1"
+	echo -e "${green}==>[comm-hyprland] ${bold}${yellow}${msg}${reset}" >&2
+}
 
 post_install() {
-    echo "Initializing system configuration..."
+	msg "Initializing system configuration..."
 
-    if [[ -f /var/lib/pacman/db.lck ]]; then
-        rm -f /var/lib/pacman/db.lck
-    fi
-    echo "Detecting GPU and installing appropriate drivers..."
-    GPU_INFO=$(lspci -nnk | grep -A3 -E "VGA|3D|Display")
+	if [[ -f /var/lib/pacman/db.lck ]]; then
+		rm -f /var/lib/pacman/db.lck >/dev/null
+	fi
 
-    if echo "$GPU_INFO" | grep -qi "NVIDIA"; then
-        echo "NVIDIA detected! Installing drivers..."
-        
-        # Detect the currently installed kernel
-        KERNEL_VERSION=$(uname -r | cut -d '.' -f1,2 | tr -d '.')
-        KERNEL_PACKAGE="linux${KERNEL_VERSION//./}-nvidia"
+	msg "Detecting GPU and installing appropriate drivers..."
+	GPU_INFO=$(lspci -nnk | grep -A3 -E "VGA|3D|Display")
 
-        echo "Detected kernel: $KERNEL_VERSION"
-        echo "Installing: $KERNEL_PACKAGE nvidia-utils nvidia-settings"
+	# Pacotes comuns para todas as GPUs
+	COMMON_PACKAGES=(
+		mhwd-biglinux
+		mesa
+		lib32-mesa
+		vulkan-mesa-layers
+		lib32-vulkan-mesa-layers
+	)
 
-        # Install NVIDIA drivers 
-        pacman -S --noconfirm --needed --overwrite \* mhwd-biglinux mesa lib32-mesa \
-            "$KERNEL_PACKAGE" nvidia-utils nvidia-settings
+	install_packages() {
+    pacman -S --noconfirm --needed --overwrite \* "$@"
+	}
 
-        # Blacklist  driver nouveau
-        echo "Blacklisting Nouveau..."
-        echo "blacklist nouveau" | tee /etc/modprobe.d/nouveau.conf
-        echo "install nouveau /bin/true" | tee -a /etc/modprobe.d/blacklist.conf
+	install_packages "${COMMON_PACKAGES[@]}"
 
-    elif echo "$GPU_INFO" | grep -qi "Intel"; then
-        echo "Intel GPU detected! Installing drivers..."
-        pacman -S --noconfirm --needed --overwrite \* mhwd-biglinux mesa lib32-mesa \
-            vulkan-intel lib32-vulkan-intel vulkan-mesa-layers lib32-vulkan-mesa-layers
+	if grep -qi "NVIDIA" <<<"$GPU_INFO"; then
+		msg "NVIDIA detected! Installing drivers..."
 
-    elif echo "$GPU_INFO" | grep -Ei "AMD|ATI"; then
-        echo "AMD/ATI GPU detected! Installing drivers..."
-        pacman -S --noconfirm --needed --overwrite \* mesa lib32-mesa mesa-utils \
-            vulkan-icd-loader lib32-vulkan-icd-loader vulkan-headers vulkan-radeon lib32-vulkan-radeon \
-            vulkan-mesa-layers lib32-vulkan-mesa-layers mhwd-amdgpu mhwd-biglinux mhwd-ati
+		# Detect kernel version and set package name
+		KERNEL_VERSION=$(uname -r | cut -d '.' -f1,2 | tr -d '.')
+		KERNEL_PACKAGE="linux${KERNEL_VERSION}-nvidia"
 
-    else
-        echo "No compatible GPU detected. Skipping driver installation."
-    fi
+		msg "Detected kernel: $KERNEL_VERSION"
+		msg "Installing: $KERNEL_PACKAGE nvidia-utils nvidia-settings"
 
-    # Enable SDDM
-    echo "Enabling SDDM..."
-    systemctl enable sddm
+		install_packages "$KERNEL_PACKAGE" nvidia-utils nvidia-settings
 
-    # Create the 'sddm' user if it doesn't exist
-    if ! id "sddm" &>/dev/null; then
-        echo "Creating SDDM user..."
-        useradd -r -s /usr/bin/nologin -M -d /var/lib/sddm sddm
-    else
-        echo "SDDM user already exists, skipping creation."
-    fi
+		# Blacklist Nouveau
+		msg "Blacklisting Nouveau..."
+		cat <<EOF | tee /etc/modprobe.d/nouveau.conf /etc/modprobe.d/blacklist.conf
+blacklist nouveau
+install nouveau /bin/true
+EOF
 
-    # Ensure SDDM directory exists with correct permissions
-    echo "Setting up SDDM directory..."
-    mkdir -p /var/lib/sddm
-    chown -R sddm:sddm /var/lib/sddm
+	elif grep -qi "Intel" <<<"$GPU_INFO"; then
+		msg "Intel GPU detected! Installing drivers..."
+		install_packages vulkan-intel lib32-vulkan-intel
 
-    # Configure dotfiles and user settings
-    echo "Setting up dotfiles symlinks..."
-    user=$(awk -F: '$3 >= 1000 && $3 < 65000 { print $1; exit }' /etc/passwd)
-    user_home=$(getent passwd "$user" | cut -d: -f6)
-    dotfiles_dir="$user_home/dotfiles"
+	elif grep -Ei "AMD|ATI" <<<"$GPU_INFO"; then
+		msg "AMD/ATI GPU detected! Installing drivers..."
+		install_packages mesa-utils \
+			vulkan-icd-loader lib32-vulkan-icd-loader \
+			vulkan-headers vulkan-radeon lib32-vulkan-radeon \
+			mhwd-amdgpu mhwd-ati
 
-    # Copy dotfiles if they don't exist
-    if [ ! -d "$dotfiles_dir" ]; then
-        echo "Copying dotfiles to $user_home..."
-        cp -r /etc/skel/dotfiles "$user_home/"
-        chown -R "$user:$user" "$dotfiles_dir"
-        chmod -R 700 "$dotfiles_dir"
-    fi
+	else
+    msg "No compatible GPU detected. Skipping driver installation."
+	fi
 
-    # Ensure necessary directories exist
-    mkdir -p "$user_home/.backup" "$user_home/.config"
-    chown "$user:$user" "$user_home/.backup" "$user_home/.config"
+	# Enable SDDM
+	msg "Enabling SDDM..."
+	systemctl enable sddm >/dev/null
 
-    # Create symlinks for home directory files
-    
-    for file in .bashrc .gtkrc-2.0 .Xresources; do
-        if [ -e "$user_home/$file" ] && [ ! -L "$user_home/$file" ]; then
-            echo "Backing up existing $file..."
-            mv "$user_home/$file" "$user_home/.backup/$file"
-        fi
-        ln -sf "$dotfiles_dir/$file" "$user_home/$file"
-    done
+	# Create the 'sddm' user if it doesn't exist
+	if ! id "sddm" &>/dev/null; then
+		msg "Creating SDDM user..."
+		useradd -r -s /usr/bin/nologin -M -d /var/lib/sddm sddm >/dev/null
+	else
+		msg "SDDM user already exists, skipping creation."
+	fi
 
-    chown -h "$user:$user" "$user_home/.bashrc" "$user_home/.gtkrc-2.0" "$user_home/.Xresources"
+	# Ensure SDDM directory exists with correct permissions
+	msg "Setting up SDDM directory..."
+	mkdir -p /var/lib/sddm >/dev/null
+	chown -R sddm:sddm /var/lib/sddm >/dev/null
 
-    # Create symlinks for configuration directories
-    config_dirs=(bashrc dunst fastfetch gtk-3.0 gtk-4.0 hypr kitty ml4w nvim nwg-dock-hyprland ohmyposh qt6ct rofi swaync vim wal waybar waypaper wlogout xsettingsd)
-    for dir in "${config_dirs[@]}"; do
-        if [ -e "$user_home/.config/$dir" ] && [ ! -L "$user_home/.config/$dir" ]; then
-            echo "Backing up existing ~/.config/$dir..."
-            mv "$user_home/.config/$dir" "$user_home/.backup/$dir"
-        fi
-        ln -sf "$dotfiles_dir/.config/$dir" "$user_home/.config/$dir"
-    done
+	# Configure dotfiles and user settings
+	echo "Setting up dotfiles symlinks..."
+	user=$(awk -F: '$3 >= 1000 && $3 < 65000 { print $1; exit }' /etc/passwd)
+	user_home=$(getent passwd "$user" | cut -d: -f6)
+	dotfiles_dir="$user_home/dotfiles"
 
-    chown -hR "$user:$user" "$user_home/.config/"
+	# Copy dotfiles if they don't exist
+	if [ ! -d "$dotfiles_dir" ]; then
+		msg "Copying dotfiles to $user_home..."
+		cp -r /etc/skel/dotfiles "$user_home/" >/dev/null
+		chown -R "$user:$user" "$dotfiles_dir" >/dev/null
+		chmod -R 700 "$dotfiles_dir" >/dev/null
+	fi
 
-    # Apply wallpaper using Pywal
-    if command -v wal &>/dev/null; then
-        echo "Applying wallpaper using Pywal for user: $user"
-        sudo -u "$user" wal -i /usr/share/backgrounds/community/animal-hpr-001.jpg
-    else
-        echo "Warning: 'wal' command not found. Skipping wallpaper setup."
-    fi
+	# Ensure necessary directories exist
+	mkdir -p "$user_home/.backup" "$user_home/.config" >/dev/null
+	chown "$user:$user" "$user_home/.backup" "$user_home/.config" >/dev/null
 
-    # Install GNOME Platform runtime globally
-    echo "Installing GNOME Platform runtime..."
-    flatpak install -y org.gnome.Platform/x86_64/47
+	# Create symlinks for home directory files
 
-    # Configure Nautilus
-    echo "Configuring Nautilus..."
-    if glib-compile-schemas /usr/share/glib-2.0/schemas/; then
-        echo "Nautilus schemas compiled successfully!"
-    else
-        echo "Warning: Failed to compile Nautilus schemas. Some features may not work correctly."
-    fi
+	for file in .bashrc .gtkrc-2.0 .Xresources; do
+		if [ -e "$user_home/$file" ] && [ ! -L "$user_home/$file" ]; then
+			msg "Backing up existing $file..."
+			mv "$user_home/$file" "$user_home/.backup/$file" >/dev/null
+		fi
+		ln -sf "$dotfiles_dir/$file" "$user_home/$file" >/dev/null
+	done
 
-    # Install local Flatpak applications
-    echo "Installing local Flatpak apps..."
-    flatpak_dir="/etc/skel/dotfiles/flatpak"
-    for app in calendar welcome settings sidebar; do
-        flatpak_file="$flatpak_dir/com.ml4w.${app}.flatpak"
-        if [ -f "$flatpak_file" ]; then
-            sudo -u "$user" bash -c "flatpak install --user -y '$flatpak_file'"
-            echo ":: com.ml4w.${app}.flatpak installed"
-        else
-            echo "Warning: $flatpak_file not found, skipping..."
-        fi
-    done
+	chown -h "$user:$user" "$user_home/.bashrc" "$user_home/.gtkrc-2.0" "$user_home/.Xresources" >/dev/null
 
-    echo "Flatpak applications installed successfully!"
+	# Create symlinks for configuration directories
+	config_dirs=(bashrc dunst fastfetch gtk-3.0 gtk-4.0 hypr kitty ml4w nvim nwg-dock-hyprland ohmyposh qt6ct rofi swaync vim wal waybar waypaper wlogout xsettingsd)
+	for dir in "${config_dirs[@]}"; do
+		if [ -e "$user_home/.config/$dir" ] && [ ! -L "$user_home/.config/$dir" ]; then
+			msg "Backing up existing ~/.config/$dir..."
+			mv "$user_home/.config/$dir" "$user_home/.backup/$dir" >/dev/null
+		fi
+		ln -sf "$dotfiles_dir/.config/$dir" "$user_home/.config/$dir" >/dev/null
+	done
 
-# Change GRUB config
-sed -i 's|^GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT="splash plymouth.enable=1 loglevel=4 libata.noacpi=1 acpi=force apm=power-off nowatchdog tsc=nowatchdog cryptomgr.notests no_timer_check rcupdate.rcu_expedited=1 intel_pstate=active amd_pstate=active cpuidle.governor=teo split_lock_detect=off clearcpuid=514 transparent_hugepage=never skew_tick=1 intremap=off nosoftlockup audit=0 nomce systemd.show_status=auto rd.udev.log_level=3 apparmor=1 security=apparmor vconsole.font=Uni2-Fixed16 intel_iommu=on amd_iommu=on tdx=on nvme_load=yes nouveau.modeset=1 i915.modeset=1 amdgpu.modeset=1 radeon.si_support=0 radeon.cik_support=0 amdgpu.si_support=1 amdgpu.cik_support=1 nvidia.modeset=1 nvidia_drm.modeset=1 DEEPIN_GFXMODE="|'  /etc/default/grub
-update-grub
-mkinitcpio -P
+	chown -hR "$user:$user" "$user_home/.config/" >/dev/null
 
-# Countdown before reboot  echo "Installation complete. Rebooting in 10 seconds..."
- echo "Installation complete. Rebooting in 10 seconds..."
-  for i in $(seq 10 -1 1); do    
-    printf "%d..." "$i"
-        sleep 1  
-    done
- echo " Now! reboot ..."
- reboot
+	# Apply wallpaper using Pywal
+	if command -v wal &>/dev/null; then
+		msg "Applying wallpaper using Pywal for user: $user"
+		sudo -u "$user" wal -i /usr/share/backgrounds/community/animal-hpr-001.jpg >/dev/null
+	else
+		msg "Warning: 'wal' command not found. Skipping wallpaper setup."
+	fi
+
+	# Install GNOME Platform runtime globally
+	msg "Installing GNOME Platform runtime..."
+	flatpak install -y org.gnome.Platform/x86_64/47 >/dev/null
+
+	# Configure Nautilus
+	msg "Configuring Nautilus..."
+	if glib-compile-schemas /usr/share/glib-2.0/schemas/; then
+		msg "Nautilus schemas compiled successfully!"
+	else
+		msg "${yellow}Warning: Failed to compile Nautilus schemas. Some features may not work correctly.${reset}"
+	fi
+
+	# Install local Flatpak applications
+	msg "Installing local Flatpak apps..."
+	flatpak_dir="/etc/skel/dotfiles/flatpak"
+	for app in calendar welcome settings sidebar; do
+		flatpak_file="$flatpak_dir/com.ml4w.${app}.flatpak"
+		if [[ -f "$flatpak_file" ]]; then
+			sudo -u "$user" bash -c "flatpak install --user -y '$flatpak_file'" >/dev/null
+			msg ":: com.ml4w.${app}.flatpak installed"
+		else
+			msg "Warning: $flatpak_file not found, skipping..."
+		fi
+	done
+
+	msg "Flatpak applications installed successfully!"
+
+	# Change GRUB config
+	sed -i 's|^GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT="splash plymouth.enable=1 loglevel=4 libata.noacpi=1 acpi=force apm=power-off nowatchdog tsc=nowatchdog cryptomgr.notests no_timer_check rcupdate.rcu_expedited=1 intel_pstate=active amd_pstate=active cpuidle.governor=teo split_lock_detect=off clearcpuid=514 transparent_hugepage=never skew_tick=1 intremap=off nosoftlockup audit=0 nomce systemd.show_status=auto rd.udev.log_level=3 apparmor=1 security=apparmor vconsole.font=Uni2-Fixed16 intel_iommu=on amd_iommu=on tdx=on nvme_load=yes nouveau.modeset=1 i915.modeset=1 amdgpu.modeset=1 radeon.si_support=0 radeon.cik_support=0 amdgpu.si_support=1 amdgpu.cik_support=1 nvidia.modeset=1 nvidia_drm.modeset=1 DEEPIN_GFXMODE="|' /etc/default/grub >/dev/null
+	update-grub
+	mkinitcpio -P
+
+	# Countdown before reboot  echo "Installation complete. Rebooting in 10 seconds..."
+	msg "Installation complete. Rebooting in 10 seconds..."
+	for i in $(seq 10 -1 1); do
+		printf "%d..." "$i"
+		sleep 1
+	done
+	msg " Now! reboot ..."
+	reboot
 }
 
 post_remove() {
-    echo "Removing symlinks and restoring backups..."
-    user=$(awk -F: '$3 >= 1000 && $3 < 65000 { print $1; exit }' /etc/passwd)
-    user_home=$(getent passwd "$user" | cut -d: -f6)
+	msg "Removing symlinks and restoring backups..."
+	user=$(awk -F: '$3 >= 1000 && $3 < 65000 { print $1; exit }' /etc/passwd)
+	user_home=$(getent passwd "$user" | cut -d: -f6)
 
-    # Restore home directory files
-    for file in .bashrc .gtkrc-2.0 .Xresources .zshrc; do
-        if [ -L "$user_home/$file" ]; then
-            rm "$user_home/$file"
-            [ -e "$user_home/.backup/$file" ] && mv "$user_home/.backup/$file" "$user_home/$file"
-        fi
-    done
-.bashrc
-    # Restore configuration directories
-    config_dirs=(bashrc dunst fastfetch gtk-3.0 gtk-4.0 hypr kitty ml4w nvim nwg-dock-hyprland ohmyposh qt6ct rofi swaync vim wal waybar waypaper wlogout xsettingsd)
-    for dir in "${config_dirs[@]}"; do
-        if [ -L "$user_home/.config/$dir" ]; then
-            rm "$user_home/.config/$dir"
-            [ -e "$user_home/.backup/$dir" ] && mv "$user_home/.backup/$dir" "$user_home/.config/$dir"
-        fi
-    done
+	# Restore home directory files
+	for file in .bashrc .gtkrc-2.0 .Xresources .zshrc; do
+		if [[ -L "$user_home/$file" ]]; then
+			rm "$user_home/$file" >/dev/null
+			[[ -e "$user_home/.backup/$file" ]] && {
+			  mv "$user_home/.backup/$file" "$user_home/$file"
+       }
+		fi
+	done
+	.bashrc
+	# Restore configuration directories
+	config_dirs=(bashrc dunst fastfetch gtk-3.0 gtk-4.0 hypr kitty ml4w nvim nwg-dock-hyprland ohmyposh qt6ct rofi swaync vim wal waybar waypaper wlogout xsettingsd)
+	for dir in "${config_dirs[@]}"; do
+		if [[ -L "$user_home/.config/$dir" ]]; then
+      rm "$user_home/.config/$dir" >/dev/null
+      [[ -e "$user_home/.backup/$dir" ]] && mv "$user_home/.backup/$dir" "$user_home/.config/$dir" >/dev/null
+		fi
+	done
 
-    # Reload .bashrc for the user
-    if [ -f "$user_home/.bashrc" ]; then
-        echo "Reloading .bashrc for user: $user"
-        sudo -u "$user" bash -c "source $user_home/.bashrc"
-    fi
+	# Reload .bashrc for the user
+	if [[ -f "$user_home/.bashrc" ]]; then
+		msg "Reloading .bashrc for user: $user"
+		sudo -u "$user" bash -c "source $user_home/.bashrc" >/dev/null
+	fi
 
-    echo "Symlinks removed, backups restored, and .bashrc reloaded for user: $user!"
+	msg "Symlinks removed, backups restored, and .bashrc reloaded for user: $user!"
 }
 
 post_upgrade() {
-    post_install
+  post_install
 }
