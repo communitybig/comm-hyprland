@@ -97,6 +97,8 @@ depends=(
     'xf86-input-vmmouse'
     'xf86-input-void'
     'timeshift'
+    'grub-btrfs-timeshift'
+    'grub-btrfs'
     'mhwd'
     'mhwd-db'
     'umc'
@@ -116,14 +118,15 @@ depends=(
     'sysstat'
 )
 
-#optdepends=(
+optdepends=(
+    'chafa'
 #    'blueman: Bluetooth support'
 #    'xfce4-taskmanager: Task manager'
 #    'xfce4-screenshooter: Screenshot tool'
 #    'thunar-archive-plugin: Archive support for Thunar'
 #    'xfce4-battery-plugin: Battery monitor'
 #    'xfce4-weather-plugin: Weather plugin'
-#)
+)
 
 pkgver=$(date +%Y%m%d)
 pkgrel=$(date +%H%M)

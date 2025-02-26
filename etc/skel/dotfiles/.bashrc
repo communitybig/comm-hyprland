@@ -32,6 +32,6 @@ done
 # Load single customization file (if exists)
 # -----------------------------------------------------
 
-if [ -f ~/.bashrc_custom ]; then
-    source ~/.bashrc_custom
-fi
+#if [ -f ~/.bashrc_custom ]; then
+#    source ~/.bashrc_custom
+#fi
