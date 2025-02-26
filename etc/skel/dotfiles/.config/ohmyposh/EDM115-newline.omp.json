@@ -46,7 +46,7 @@
           "properties": {
             "cache_duration": "none"
           },
-          "template": "{{ .Icon }}  ",
+          "template": "  ",
           "foreground": "#f8f8f2",
           "powerline_symbol": "\ue0b0",
           "background": "#282a36",

@@ -20,7 +20,7 @@ post_install() {
         echo "Installing: $KERNEL_PACKAGE nvidia-utils nvidia-settings"
 
         # Install NVIDIA drivers 
-        pacman -S --noconfirm mesa lib32-mesa \
+        pacman -S --noconfirm --needed --overwrite \* mhwd-biglinux mesa lib32-mesa \
             "$KERNEL_PACKAGE" nvidia-utils nvidia-settings
 
         # Blacklist  driver nouveau
@@ -28,28 +28,16 @@ post_install() {
         echo "blacklist nouveau" | tee /etc/modprobe.d/nouveau.conf
         echo "install nouveau /bin/true" | tee -a /etc/modprobe.d/blacklist.conf
 
-        # Modify GRUB to enable nvidia-drm.modeset=1
-        echo "Modifying GRUB to enable nvidia-drm.modeset=1..."
-        sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& nvidia-drm.modeset=1/' /etc/default/grub
-
-        update-grub
-        mkinitcpio -P
-
     elif echo "$GPU_INFO" | grep -qi "Intel"; then
         echo "Intel GPU detected! Installing drivers..."
-        pacman -S --noconfirm mesa lib32-mesa \
+        pacman -S --noconfirm --needed --overwrite \* mhwd-biglinux mesa lib32-mesa \
             vulkan-intel lib32-vulkan-intel vulkan-mesa-layers lib32-vulkan-mesa-layers
 
-    elif echo "$GPU_INFO" | grep -qi "AMD"; then
-        echo "AMD GPU detected! Installing drivers..."
-        pacman -S --noconfirm mesa lib32-mesa \
-            vulkan-radeon lib32-vulkan-radeon vulkan-mesa-layers lib32-vulkan-mesa-layers mhwd-amdgpu
-        
-        echo "Modifying GRUB to enable amdgpu.modeset=1..."
-        sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& amdgpu.modeset=1/' /etc/default/grub
-
-        update-grub
-        mkinitcpio -P
+    elif echo "$GPU_INFO" | grep -Ei "AMD|ATI"; then
+        echo "AMD/ATI GPU detected! Installing drivers..."
+        pacman -S --noconfirm --needed --overwrite \* mesa lib32-mesa mesa-utils \
+            vulkan-icd-loader lib32-vulkan-icd-loader vulkan-headers vulkan-radeon lib32-vulkan-radeon \
+            vulkan-mesa-layers lib32-vulkan-mesa-layers mhwd-amdgpu mhwd-biglinux mhwd-ati
 
     else
         echo "No compatible GPU detected. Skipping driver installation."
@@ -91,6 +79,7 @@ post_install() {
     chown "$user:$user" "$user_home/.backup" "$user_home/.config"
 
     # Create symlinks for home directory files
+    
     for file in .bashrc .gtkrc-2.0 .Xresources; do
         if [ -e "$user_home/$file" ] && [ ! -L "$user_home/$file" ]; then
             echo "Backing up existing $file..."
@@ -98,8 +87,8 @@ post_install() {
         fi
         ln -sf "$dotfiles_dir/$file" "$user_home/$file"
     done
-    
-    chown -h "$user:$user" "$user_home/.gtkrc-2.0" "$user_home/.Xresources"
+
+    chown -h "$user:$user" "$user_home/.bashrc" "$user_home/.gtkrc-2.0" "$user_home/.Xresources"
 
     # Create symlinks for configuration directories
     config_dirs=(bashrc dunst fastfetch gtk-3.0 gtk-4.0 hypr kitty ml4w nvim nwg-dock-hyprland ohmyposh qt6ct rofi swaync vim wal waybar waypaper wlogout xsettingsd)
@@ -148,6 +137,11 @@ post_install() {
 
     echo "Flatpak applications installed successfully!"
 
+# Change GRUB config
+sed -i 's|^GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT="splash plymouth.enable=1 loglevel=4 libata.noacpi=1 acpi=force apm=power-off nowatchdog tsc=nowatchdog cryptomgr.notests no_timer_check rcupdate.rcu_expedited=1 intel_pstate=active amd_pstate=active cpuidle.governor=teo split_lock_detect=off clearcpuid=514 transparent_hugepage=never skew_tick=1 intremap=off nosoftlockup audit=0 nomce systemd.show_status=auto rd.udev.log_level=3 apparmor=1 security=apparmor vconsole.font=Uni2-Fixed16 intel_iommu=on amd_iommu=on tdx=on nvme_load=yes nouveau.modeset=1 i915.modeset=1 amdgpu.modeset=1 radeon.si_support=0 radeon.cik_support=0 amdgpu.si_support=1 amdgpu.cik_support=1 nvidia.modeset=1 nvidia_drm.modeset=1 DEEPIN_GFXMODE="|'  /etc/default/grub
+update-grub
+mkinitcpio -P
+
 # Countdown before reboot  echo "Installation complete. Rebooting in 10 seconds..."
  echo "Installation complete. Rebooting in 10 seconds..."
   for i in $(seq 10 -1 1); do    
@@ -170,7 +164,7 @@ post_remove() {
             [ -e "$user_home/.backup/$file" ] && mv "$user_home/.backup/$file" "$user_home/$file"
         fi
     done
-
+.bashrc
     # Restore configuration directories
     config_dirs=(bashrc dunst fastfetch gtk-3.0 gtk-4.0 hypr kitty ml4w nvim nwg-dock-hyprland ohmyposh qt6ct rofi swaync vim wal waybar waypaper wlogout xsettingsd)
     for dir in "${config_dirs[@]}"; do
