@@ -5,6 +5,9 @@
 pkgname=comm-hyprland
 pkgdesc="Package group to install BigHyprland"
 depends=(
+    'go'
+    'base-devel'
+    'btop'
     'comm-wallpapers-hyprland'
     'ml4w-hyprland'
     'fastfetch'
@@ -36,7 +39,8 @@ depends=(
     'qt6ct'
     'waybar'
     'rofi-wayland'
-    #'polkit-gnome'
+    'polkit-gnome'
+    'polkit'
     'zsh'
     'zsh-completions'
     'fzf'
@@ -83,6 +87,8 @@ depends=(
     'pipewire-alsa'
     'pipewire-pulse'
     'manjaro-pipewire'
+    'jack2' 
+    'lib32-jack2'
     'libsndfile'
     'lib32-libsndfile'    
     'xf86-input-elographics'
@@ -91,23 +97,36 @@ depends=(
     'xf86-input-vmmouse'
     'xf86-input-void'
     'timeshift'
+    'grub-btrfs-timeshift'
+    'grub-btrfs'
     'mhwd'
     'mhwd-db'
     'umc'
     'libxcvt'
     'b43-fwcutter'
-    'base-devel'
     'glxinfo'
+    # Add
+    'clang'
+    'gnu-free-fonts'
+    'harfbuzz-icu'
+    'hyphen'
+    'inotify-tools'
+    'inxi'
+    'libavif'
+    'lsof'
+    'ncdu'
+    'sysstat'
 )
 
-#optdepends=(
+optdepends=(
+    'chafa'
 #    'blueman: Bluetooth support'
 #    'xfce4-taskmanager: Task manager'
 #    'xfce4-screenshooter: Screenshot tool'
 #    'thunar-archive-plugin: Archive support for Thunar'
 #    'xfce4-battery-plugin: Battery monitor'
 #    'xfce4-weather-plugin: Weather plugin'
-#)
+)
 
 pkgver=$(date +%Y%m%d)
 pkgrel=$(date +%H%M)
@@ -124,6 +143,7 @@ elif [ -e "pkgbuild.install" ]; then
 fi
 
 package() {
+    
     cd "${srcdir}/${pkgname}"
 
     # Determine the correct source directory

@@ -5,5 +5,5 @@
 # -----------------------------------------------------
 # Exports
 # -----------------------------------------------------
-export EDITOR=nvim
+export EDITOR=nano
 export PATH="/usr/lib/ccache/bin/:$PATH"
