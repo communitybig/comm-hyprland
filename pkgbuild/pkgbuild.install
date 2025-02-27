@@ -4,7 +4,7 @@
 export TERM=${TERM:-xterm}
 export TERM=${TERM:-xterm-256color}
 
-# Definindo variáveis de cores (somente em negrito)
+# Defining color variables (bold only)
 export black="\033[1;30m"
 export red="\033[1;31m"
 export green="\033[1;32m"
@@ -14,7 +14,7 @@ export magenta="\033[1;35m"
 export cyan="\033[1;36m"
 export white="\033[1;37m"
 
-# Definindo variáveis para negrito e reset
+# Setting variables for bold and reset
 export bold="\033[1m"
 export reset="\033[0m"
 
@@ -33,7 +33,7 @@ post_install() {
 	msg "Detecting GPU and installing appropriate drivers..."
 	GPU_INFO=$(lspci -nnk | grep -A3 -E "VGA|3D|Display")
 
-	# Pacotes comuns para todas as GPUs
+	# Common packages for all GPUs
 	COMMON_PACKAGES=(
 		mhwd-biglinux
 		mesa
@@ -176,10 +176,14 @@ EOF
 
 	msg "Flatpak applications installed successfully!"
 
+	msg "Configuring grub..."
 	# Change GRUB config
 	sed -i 's|^GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT="splash plymouth.enable=1 loglevel=4 libata.noacpi=1 acpi=force apm=power-off nowatchdog tsc=nowatchdog cryptomgr.notests no_timer_check rcupdate.rcu_expedited=1 intel_pstate=active amd_pstate=active cpuidle.governor=teo split_lock_detect=off clearcpuid=514 transparent_hugepage=never skew_tick=1 intremap=off nosoftlockup audit=0 nomce systemd.show_status=auto rd.udev.log_level=3 apparmor=1 security=apparmor vconsole.font=Uni2-Fixed16 intel_iommu=on amd_iommu=on tdx=on nvme_load=yes nouveau.modeset=1 i915.modeset=1 amdgpu.modeset=1 radeon.si_support=0 radeon.cik_support=0 amdgpu.si_support=1 amdgpu.cik_support=1 nvidia.modeset=1 nvidia_drm.modeset=1 DEEPIN_GFXMODE="|' /etc/default/grub >/dev/null
 	update-grub
 	mkinitcpio -P
+
+	# Remove hyprland-uwsm entry SDDM
+	rm -f /usr/share/wayland-sessions/hyprland-uwsm.desktop
 
 	# Countdown before reboot  echo "Installation complete. Rebooting in 10 seconds..."
 	msg "Installation complete. Rebooting in 10 seconds..."
