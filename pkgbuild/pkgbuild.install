@@ -4,7 +4,7 @@
 export TERM=${TERM:-xterm}
 export TERM=${TERM:-xterm-256color}
 
-# Definindo variáveis de cores (somente em negrito)
+# Defining color variables (bold only)
 export black="\033[1;30m"
 export red="\033[1;31m"
 export green="\033[1;32m"
@@ -14,7 +14,7 @@ export magenta="\033[1;35m"
 export cyan="\033[1;36m"
 export white="\033[1;37m"
 
-# Definindo variáveis para negrito e reset
+# Setting variables for bold and reset
 export bold="\033[1m"
 export reset="\033[0m"
 
@@ -33,7 +33,7 @@ post_install() {
 	msg "Detecting GPU and installing appropriate drivers..."
 	GPU_INFO=$(lspci -nnk | grep -A3 -E "VGA|3D|Display")
 
-	# Pacotes comuns para todas as GPUs
+	# Common packages for all GPUs
 	COMMON_PACKAGES=(
 		mhwd-biglinux
 		mesa
