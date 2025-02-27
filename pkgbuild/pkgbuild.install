@@ -36,16 +36,29 @@ post_install() {
 	# Common packages for all GPUs
 	COMMON_PACKAGES=(
 		mhwd-biglinux
+    mhwd-amdgpu
+    mhwd-ati
 		mesa
+		mesa-utils
 		lib32-mesa
-		vulkan-mesa-layers
 		lib32-vulkan-mesa-layers
+		lib32-vulkan-intel
+    lib32-vulkan-icd-loader
+    lib32-vulkan-radeon
+		nvidia-utils
+		nvidia-settings
+		vulkan-mesa-layers
+		vulkan-intel
+    vulkan-headers
+    vulkan-radeon
+    vulkan-icd-loader
 	)
 
 	install_packages() {
-    pacman -S --noconfirm --needed --overwrite \* "$@"
+    pacman -S --quiet --noconfirm --needed --overwrite \* "$@" &>/dev/null
 	}
 
+	msg "Installing common packages"
 	install_packages "${COMMON_PACKAGES[@]}"
 
 	if grep -qi "NVIDIA" <<<"$GPU_INFO"; then
@@ -58,7 +71,7 @@ post_install() {
 		msg "Detected kernel: $KERNEL_VERSION"
 		msg "Installing: $KERNEL_PACKAGE nvidia-utils nvidia-settings"
 
-		install_packages "$KERNEL_PACKAGE" nvidia-utils nvidia-settings
+    #install_packages "$KERNEL_PACKAGE" nvidia-utils nvidia-settings
 
 		# Blacklist Nouveau
 		msg "Blacklisting Nouveau..."
@@ -69,14 +82,14 @@ EOF
 
 	elif grep -qi "Intel" <<<"$GPU_INFO"; then
 		msg "Intel GPU detected! Installing drivers..."
-		install_packages vulkan-intel lib32-vulkan-intel
+		#install_packages vulkan-intel lib32-vulkan-intel
 
-	elif grep -Ei "AMD|ATI" <<<"$GPU_INFO"; then
+	elif grep -qEi "AMD|ATI" <<<"$GPU_INFO"; then
 		msg "AMD/ATI GPU detected! Installing drivers..."
-		install_packages mesa-utils \
-			vulkan-icd-loader lib32-vulkan-icd-loader \
-			vulkan-headers vulkan-radeon lib32-vulkan-radeon \
-			mhwd-amdgpu mhwd-ati
+		#install_packages mesa-utils \
+			#vulkan-icd-loader lib32-vulkan-icd-loader \
+			#vulkan-headers vulkan-radeon lib32-vulkan-radeon \
+			#mhwd-amdgpu mhwd-ati
 
 	else
     msg "No compatible GPU detected. Skipping driver installation."
@@ -87,7 +100,7 @@ EOF
 	systemctl enable sddm >/dev/null
 
 	# Create the 'sddm' user if it doesn't exist
-	if ! id "sddm" &>/dev/null; then
+	if ! id "sddm" >/dev/null; then
 		msg "Creating SDDM user..."
 		useradd -r -s /usr/bin/nologin -M -d /var/lib/sddm sddm >/dev/null
 	else
@@ -100,7 +113,7 @@ EOF
 	chown -R sddm:sddm /var/lib/sddm >/dev/null
 
 	# Configure dotfiles and user settings
-	echo "Setting up dotfiles symlinks..."
+	msg "Setting up dotfiles symlinks..."
 	user=$(awk -F: '$3 >= 1000 && $3 < 65000 { print $1; exit }' /etc/passwd)
 	user_home=$(getent passwd "$user" | cut -d: -f6)
 	dotfiles_dir="$user_home/dotfiles"
@@ -151,7 +164,7 @@ EOF
 
 	# Install GNOME Platform runtime globally
 	msg "Installing GNOME Platform runtime..."
-	flatpak install -y org.gnome.Platform/x86_64/47 >/dev/null
+	flatpak install -y org.gnome.Platform/x86_64/47 &>/dev/null
 
 	# Configure Nautilus
 	msg "Configuring Nautilus..."
@@ -167,7 +180,7 @@ EOF
 	for app in calendar welcome settings sidebar; do
 		flatpak_file="$flatpak_dir/com.ml4w.${app}.flatpak"
 		if [[ -f "$flatpak_file" ]]; then
-			sudo -u "$user" bash -c "flatpak install --user -y '$flatpak_file'" >/dev/null
+			sudo -u "$user" bash -c "flatpak install --user -y '$flatpak_file'" &>/dev/null
 			msg ":: com.ml4w.${app}.flatpak installed"
 		else
 			msg "Warning: $flatpak_file not found, skipping..."
@@ -179,20 +192,23 @@ EOF
 	msg "Configuring grub..."
 	# Change GRUB config
 	sed -i 's|^GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT="splash plymouth.enable=1 loglevel=4 libata.noacpi=1 acpi=force apm=power-off nowatchdog tsc=nowatchdog cryptomgr.notests no_timer_check rcupdate.rcu_expedited=1 intel_pstate=active amd_pstate=active cpuidle.governor=teo split_lock_detect=off clearcpuid=514 transparent_hugepage=never skew_tick=1 intremap=off nosoftlockup audit=0 nomce systemd.show_status=auto rd.udev.log_level=3 apparmor=1 security=apparmor vconsole.font=Uni2-Fixed16 intel_iommu=on amd_iommu=on tdx=on nvme_load=yes nouveau.modeset=1 i915.modeset=1 amdgpu.modeset=1 radeon.si_support=0 radeon.cik_support=0 amdgpu.si_support=1 amdgpu.cik_support=1 nvidia.modeset=1 nvidia_drm.modeset=1 DEEPIN_GFXMODE="|' /etc/default/grub >/dev/null
-	update-grub
-	mkinitcpio -P
+	msg "Generating grub files..."
+	update-grub &>/dev/null
+	msg "Generating initram..."
+	mkinitcpio -P &>/dev/null
 
 	# Remove hyprland-uwsm entry SDDM
-	rm -f /usr/share/wayland-sessions/hyprland-uwsm.desktop
+	rm -f /usr/share/wayland-sessions/hyprland-uwsm.desktop &>/dev/null
 
-	# Countdown before reboot  echo "Installation complete. Rebooting in 10 seconds..."
+	# Countdown before reboot
 	msg "Installation complete. Rebooting in 10 seconds..."
 	for i in $(seq 10 -1 1); do
 		printf "%d..." "$i"
 		sleep 1
 	done
+	echo
 	msg " Now! reboot ..."
-	reboot
+  reboot
 }
 
 post_remove() {
