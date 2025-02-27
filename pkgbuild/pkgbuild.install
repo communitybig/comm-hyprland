@@ -52,7 +52,7 @@ post_install() {
 	msg "Installing common packages: ${COMMON_PACKAGES[*]}"
 	install_packages "${COMMON_PACKAGES[@]}"
 
-	if grep -qi "NVIDIA" <<<"$GPU_INFO"; then
+	if grep -qiw "NVIDIA" <<<"$GPU_INFO"; then
 		msg "NVIDIA detected! Installing drivers..."
 
 		# Detect kernel version and set package name
@@ -70,11 +70,11 @@ blacklist nouveau
 install nouveau /bin/true
 EOF
 
-	elif grep -qi "Intel" <<<"$GPU_INFO"; then
+	elif grep -qiw "Intel" <<<"$GPU_INFO"; then
 		msg "Intel GPU detected! Installing drivers..."
 		install_packages vulkan-intel lib32-vulkan-intel
 
-	elif grep -qEi "AMD|ATI" <<<"$GPU_INFO"; then
+	elif grep -qEiw "AMD|ATI" <<<"$GPU_INFO"; then
 		msg "AMD/ATI GPU detected! Installing drivers..."
 		install_packages mesa-utils \
 		  vulkan-icd-loader lib32-vulkan-icd-loader \
