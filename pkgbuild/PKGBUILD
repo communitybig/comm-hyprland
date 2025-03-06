@@ -5,6 +5,8 @@
 pkgname=comm-hyprland
 pkgdesc="Package group to install BigHyprland"
 depends=(
+    'auto-tweaks-browser'
+    'comm-base-config'    
     'go'
     'base-devel'
     'btop'
@@ -116,7 +118,7 @@ depends=(
     'libavif'
     'lsof'
     'ncdu'
-    'sysstat'
+    'sysstat'    
 )
 
 optdepends=(
@@ -144,7 +146,11 @@ elif [ -e "pkgbuild.install" ]; then
 fi
 
 package() {
+
+    mkdir -p "${pkgdir}/etc/"
     
+    cp "${srcdir}/${pkgname}/etc/sddm.conf" "${pkgdir}/etc/sddm.conf.new"
+
     cd "${srcdir}/${pkgname}"
 
     # Determine the correct source directory
