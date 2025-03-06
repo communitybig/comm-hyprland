@@ -242,6 +242,8 @@ post_remove() {
 		msg "Reloading .bashrc for user: $user"
 		sudo -u "$user" bash -c "source $user_home/.bashrc" >/dev/null
 	fi
+	msg "Restoring files from SDDM..."
+	mv -f /etc/sddm.conf.bak /etc/sddm.conf
 
 	msg "Symlinks removed, backups restored, and .bashrc reloaded for user: $user!"
 }
