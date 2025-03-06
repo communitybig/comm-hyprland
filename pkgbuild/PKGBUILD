@@ -146,10 +146,7 @@ elif [ -e "pkgbuild.install" ]; then
 fi
 
 package() {
-    mkdir -p "${pkgdir}/etc/"
     
-    install -Dm644 "${srcdir}/${pkgname}/etc/sddm.conf" "${pkgdir}/etc/sddm.conf.pacnew"
-
     cd "${srcdir}/${pkgname}"
 
     # Determine the correct source directory
