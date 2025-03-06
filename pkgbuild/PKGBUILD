@@ -146,10 +146,9 @@ elif [ -e "pkgbuild.install" ]; then
 fi
 
 package() {
-
     mkdir -p "${pkgdir}/etc/"
     
-    cp "${srcdir}/${pkgname}/etc/sddm.conf" "${pkgdir}/etc/sddm.conf.new"
+    install -Dm644 "${srcdir}/${pkgname}/etc/sddm.conf" "${pkgdir}/etc/sddm.conf.pacnew"
 
     cd "${srcdir}/${pkgname}"
 

@@ -26,13 +26,17 @@ msg() {
 post_install() {
 	msg "Initializing system configuration..."
 
-msg "Checking if /etc/sddm.conf already exists..."
+    msg "Checking if /etc/sddm.conf already exists..."
 
-if [[ -f /etc/sddm.conf ]]; then
-    msg "Existing /etc/sddm.conf found. Creating a backup at /etc/sddm.conf.bak..."
-    mv /etc/sddm.conf /etc/sddm.conf.bak
-	mv -f /etc/sddm.conf.new /etc/sddm.conf
-fi
+    if [[ -f /etc/sddm.conf ]]; then
+        msg "Existing /etc/sddm.conf found. Creating a backup at /etc/sddm.conf.bak..."
+        mv /etc/sddm.conf /etc/sddm.conf.bak
+        msg "Applying new SDDM configuration..."
+        mv /etc/sddm.conf.pacnew /etc/sddm.conf
+    elif [[ -f /etc/sddm.conf.pacnew ]]; then
+        msg "No existing SDDM configuration found. Using default settings..."
+        mv /etc/sddm.conf.pacnew /etc/sddm.conf
+    fi
 
 msg "Installing the SDDM configuration from the package..."
 install -Dm644 "${pkgdir}/etc/sddm.conf" /etc/sddm.conf
