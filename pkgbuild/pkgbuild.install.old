@@ -17,37 +17,24 @@ export white="\033[1;37m"
 # Setting variables for bold and reset
 export bold="\033[1m"
 export reset="\033[0m"
-export pkgname=comm-hyprland
-declare IS_UPGRADE=false
 
 msg() {
 	local msg="$1"
 	echo -e "${green}==>[comm-hyprland] ${bold}${yellow}${msg}${reset}" >&2
 }
 
-sh_load_optdepends() {
-	local info_file="/usr/share/${pkgname}/optdepends"
-
-	if [[ -f "$info_file" && -r "$info_file" ]]; then
-		mapfile -t OPTDEPENDS <"$info_file"
-	else
-		msg "${red}FATAL: Something went wrong! File '$info_file' not found or without read permission."
-		msg "${red}FATAL: Something went wrong! File '$info_file' not found or without read permission."
-	fi
-}
-
 post_install() {
-	msg "Initializing system installation and configuration..."
+	msg "Initializing system configuration..."
 
-	sh_load_optdepends
-
-	[[ -e /etc/environment ]] && source /etc/environment
-	: "${IN_CHROOT_INSTALLER:=false}"
-	: "${IN_CHROOT_INSTALLER_USER:=root}"
+  [[ -e /etc/environment ]] && source /etc/environment
+  : "${IN_CHROOT_INSTALLER:=false}"
 
 	if [[ -f /var/lib/pacman/db.lck ]]; then
 		rm -f /var/lib/pacman/db.lck &>/dev/null
 	fi
+
+	msg "Detecting GPU and installing appropriate drivers..."
+	GPU_INFO=$(lspci -nnk | grep -A3 -E "VGA|3D|Display")
 
 	# Common packages for all GPUs
 	COMMON_PACKAGES=(
@@ -58,30 +45,17 @@ post_install() {
 		lib32-vulkan-mesa-layers
 	)
 
-	synchronizing_database() {
-		pacman -Sy --quiet --noconfirm &>/dev/null
-	}
-
 	install_packages() {
 		pacman -S --quiet --noconfirm --needed --overwrite \* "$@" &>/dev/null
 	}
 
-	msg "Please wait, synchronizing databases..."
-	synchronizing_database
-
 	msg "Installing common packages: ${COMMON_PACKAGES[*]}"
 	install_packages "${COMMON_PACKAGES[@]}"
-
-	msg "Installing optdepends packages: ${OPTDEPENDS[*]}"
-	install_packages "${OPTDEPENDS[@]}"
-
-	msg "Detecting GPU and installing appropriate drivers..."
-	GPU_INFO=$(lspci -nnk | grep -A3 -E "VGA|3D|Display")
 
 	if grep -qiw "NVIDIA" <<<"$GPU_INFO"; then
 		msg "NVIDIA detected! Installing drivers..."
 
-		msg "Detect kernel version and set package name"
+		# Detect kernel version and set package name
 		KERNEL_VERSION=$(uname -r | cut -d '.' -f1,2 | tr -d '.')
 		KERNEL_PACKAGE="linux${KERNEL_VERSION}-nvidia"
 
@@ -89,25 +63,31 @@ post_install() {
 		msg "Installing NVIDIA packages: $KERNEL_PACKAGE nvidia-utils nvidia-settings"
 		install_packages "$KERNEL_PACKAGE" nvidia-utils nvidia-settings
 
+		# Blacklist Nouveau
 		msg "Blacklisting Nouveau..."
 		cat <<EOF | tee /etc/modprobe.d/nouveau.conf /etc/modprobe.d/blacklist.conf
 blacklist nouveau
 install nouveau /bin/true
 EOF
+
 	elif grep -qiw "Intel" <<<"$GPU_INFO"; then
 		msg "Intel GPU detected! Installing drivers..."
 		install_packages vulkan-intel lib32-vulkan-intel
-		:
+
 	elif grep -qEiw "AMD|ATI" <<<"$GPU_INFO"; then
 		msg "AMD/ATI GPU detected! Installing drivers..."
 		install_packages mesa-utils \
-			vulkan-icd-loader lib32-vulkan-icd-loader \
-			vulkan-headers vulkan-radeon lib32-vulkan-radeon \
-			mhwd-amdgpu mhwd-ati
-		:
+		  vulkan-icd-loader lib32-vulkan-icd-loader \
+		  vulkan-headers vulkan-radeon lib32-vulkan-radeon \
+		  mhwd-amdgpu mhwd-ati
+
 	else
 		msg "${yellow}Warning: No compatible GPU detected. Skipping driver installation.${reset}"
 	fi
+
+	# Enable SDDM
+	msg "Enabling SDDM..."
+	systemctl enable sddm >/dev/null
 
 	# Create the 'sddm' user if it doesn't exist
 	if ! id "sddm" >/dev/null; then
@@ -122,33 +102,27 @@ EOF
 	mkdir -p /var/lib/sddm >/dev/null
 	chown -R sddm:sddm /var/lib/sddm >/dev/null
 
-	msg "Checking if /etc/sddm.conf already exists..."
+    msg "Checking if /etc/sddm.conf already exists..."
 
-	if [[ -f /etc/sddm.conf ]]; then
-		msg "Existing /etc/sddm.conf found. Creating a backup at /etc/sddm.conf.bak..."
-		mv /etc/sddm.conf /etc/sddm.conf.bak
-		msg "Applying new SDDM configuration..."
-		mv /etc/sddm.conf.pacnew /etc/sddm.conf
-	elif [[ -f /etc/sddm.conf.pacnew ]]; then
-		msg "No existing SDDM configuration found. Using default settings..."
-		mv /etc/sddm.conf.pacnew /etc/sddm.conf
-	fi
+    if [[ -f /etc/sddm.conf ]]; then
+        msg "Existing /etc/sddm.conf found. Creating a backup at /etc/sddm.conf.bak..."
+        mv /etc/sddm.conf /etc/sddm.conf.bak
+        msg "Applying new SDDM configuration..."
+        mv /etc/sddm.conf.pacnew /etc/sddm.conf
+    elif [[ -f /etc/sddm.conf.pacnew ]]; then
+        msg "No existing SDDM configuration found. Using default settings..."
+        mv /etc/sddm.conf.pacnew /etc/sddm.conf
+    fi	
 
 	# Configure dotfiles and user settings
 	msg "Setting up dotfiles symlinks..."
 	user=$(awk -F: '$3 >= 1000 && $3 < 65000 { print $1; exit }' /etc/passwd)
-	if $IN_CHROOT_INSTALLER; then
-		if [[ -n $IN_CHROOT_INSTALLER_USER || $IN_CHROOT_INSTALLER_USER != 'root' ]]; then
-			user=$IN_CHROOT_INSTALLER_USER
-		fi
-	fi
 	user_home=$(getent passwd "$user" | cut -d: -f6)
 	dotfiles_dir="$user_home/dotfiles"
 
 	# Copy dotfiles if they don't exist
 	[[ ! -d "$dotfiles_dir" ]] && {
 		msg "Copying dotfiles to $user_home..."
-		mkdir -p "$user_home" &>/dev/null
 		cp -r /etc/skel/dotfiles "$user_home/" &>/dev/null
 		chown -R "$user:$user" "$dotfiles_dir" &>/dev/null
 		chmod -R 700 "$dotfiles_dir" &>/dev/null
@@ -199,22 +173,13 @@ EOF
 		msg "${yellow}Warning: Failed to compile Nautilus schemas. Some features may not work correctly.${reset}"
 	fi
 
-	if ! $IS_UPGRADE; then
-		msg "Enabling SDDM..."
-		if ! systemctl enable sddm &>/dev/null; then
-			msg "${red}Error: It went wrong when activating SDDM"
-		fi
-	fi
-
-
 	# Install local Flatpak applications
 	msg "Installing local Flatpak apps..."
 	flatpak_dir="/etc/skel/dotfiles/flatpak"
 	for app in calendar welcome settings sidebar; do
 		flatpak_file="$flatpak_dir/com.ml4w.${app}.flatpak"
 		if [[ -f "$flatpak_file" ]]; then
-			#			sudo -u "$user" bash -c "flatpak install --user -y '$flatpak_file'" &>/dev/null
-			su - "$user" -c "flatpak install --user -y '$flatpak_file'" &>/dev/null
+			sudo -u "$user" bash -c "flatpak install --user -y '$flatpak_file'" &>/dev/null
 			msg ":: com.ml4w.${app}.flatpak installed"
 		else
 			msg "${yellow}Warning: $flatpak_file not found, skipping...${reset}"
@@ -222,36 +187,30 @@ EOF
 	done
 	msg "Flatpak applications installed successfully!"
 
-	if ! $IN_CHROOT_INSTALLER; then
-		if ! $IS_UPGRADE; then
-			msg "Please wait, Generating initramfs for all kernels..."
-			mkinitcpio -P &>/dev/null
+  if ! $IN_CHROOT_INSTALLER; then
+    msg "Please wait, Generating initramfs for all kernels..."
+  	mkinitcpio -P &>/dev/null
 
-			msg "Configuring GRUB..."
-			# Change GRUB config
-			sed -i 's|^GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT="splash plymouth.enable=1 loglevel=4 libata.noacpi=1 acpi=force apm=power-off nowatchdog tsc=nowatchdog cryptomgr.notests no_timer_check rcupdate.rcu_expedited=1 intel_pstate=active amd_pstate=active cpuidle.governor=teo split_lock_detect=off clearcpuid=514 transparent_hugepage=never skew_tick=1 intremap=off nosoftlockup audit=0 nomce systemd.show_status=auto rd.udev.log_level=3 apparmor=1 security=apparmor vconsole.font=Uni2-Fixed16 intel_iommu=on amd_iommu=on tdx=on nvme_load=yes nouveau.modeset=1 i915.modeset=1 amdgpu.modeset=1 radeon.si_support=0 radeon.cik_support=0 amdgpu.si_support=1 amdgpu.cik_support=1 nvidia.modeset=1 nvidia_drm.modeset=1 DEEPIN_GFXMODE="|' /etc/default/grub >/dev/null
+  	msg "Configuring GRUB..."
+  	# Change GRUB config
+  	sed -i 's|^GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT="splash plymouth.enable=1 loglevel=4 libata.noacpi=1 acpi=force apm=power-off nowatchdog tsc=nowatchdog cryptomgr.notests no_timer_check rcupdate.rcu_expedited=1 intel_pstate=active amd_pstate=active cpuidle.governor=teo split_lock_detect=off clearcpuid=514 transparent_hugepage=never skew_tick=1 intremap=off nosoftlockup audit=0 nomce systemd.show_status=auto rd.udev.log_level=3 apparmor=1 security=apparmor vconsole.font=Uni2-Fixed16 intel_iommu=on amd_iommu=on tdx=on nvme_load=yes nouveau.modeset=1 i915.modeset=1 amdgpu.modeset=1 radeon.si_support=0 radeon.cik_support=0 amdgpu.si_support=1 amdgpu.cik_support=1 nvidia.modeset=1 nvidia_drm.modeset=1 DEEPIN_GFXMODE="|' /etc/default/grub >/dev/null
 
-			msg "Generating GRUB configuration files..."
-			update-grub &>/dev/null
-		fi
-	fi
+  	msg "Generating GRUB configuration files..."
+	  update-grub &>/dev/null
+  fi
 
 	msg "Removing Hyprland-UWSM entry from SDDM..."
 	rm -f /usr/share/wayland-sessions/hyprland-uwsm.desktop &>/dev/null
 
-	if ! $IS_UPGRADE; then
-		msg "Installation complete. Rebooting in 10 seconds..."
-		# Countdown before reboot
-		for i in $(seq 10 -1 1); do
-			printf "%d..." "$i"
-			sleep 1
-		done
-		echo
-		msg "Rebooting now..."
-		reboot
-	else
-		msg "Upgrade complete."
-	fi
+	msg "Installation complete. Rebooting in 10 seconds..."
+	# Countdown before reboot
+	for i in $(seq 10 -1 1); do
+		printf "%d..." "$i"
+		sleep 1
+	done
+	echo
+	msg "Rebooting now..."
+	reboot
 }
 
 post_remove() {
@@ -290,6 +249,5 @@ post_remove() {
 }
 
 post_upgrade() {
-	IS_UPGRADE=true
 	post_install
 }
