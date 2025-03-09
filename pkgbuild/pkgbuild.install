@@ -21,8 +21,8 @@ export pkgname=comm-hyprland
 declare IS_UPGRADE=false
 
 msg() {
-	local msg="$1"
-	echo -e "${green}==>[comm-hyprland] ${bold}${yellow}${msg}${reset}" >&2
+  local msg="$1"
+  echo -e "${green}==>[$pkgname] ${bold}${yellow}${msg}${reset}" >&2
 }
 
 sh_load_optdepends() {
