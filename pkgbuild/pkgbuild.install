@@ -21,8 +21,8 @@ export pkgname=comm-hyprland
 declare IS_UPGRADE=false
 
 msg() {
-  local msg="$1"
-  echo -e "${green}==>[$pkgname] ${bold}${yellow}${msg}${reset}" >&2
+	local msg="$1"
+	echo -e "${green}==>[$pkgname] ${bold}${yellow}${msg}${reset}" >&2
 }
 
 sh_load_optdepends() {
@@ -33,6 +33,22 @@ sh_load_optdepends() {
 	else
 		msg "${red}FATAL: Something went wrong! File '$info_file' not found or without read permission."
 		msg "${red}FATAL: Something went wrong! File '$info_file' not found or without read permission."
+	fi
+}
+
+sh_start_dbus_in_chroot() {
+	# Verifica se o D-Bus já está em execução
+	if ! pgrep -x "dbus-daemon" >/dev/null; then
+		# Cria o diretório para o socket do D-Bus
+		mkdir -p /run/dbus
+		chmod 755 /run/dbus
+
+		# Inicia o D-Bus
+		dbus-daemon --system --fork
+
+		# Configura as variáveis de ambiente
+		export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
+		export DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
 	fi
 }
 
@@ -189,6 +205,10 @@ EOF
 
 	# Install GNOME Platform runtime globally
 	msg "Installing GNOME Platform runtime..."
+
+	if $IN_CHROOT_INSTALLER; then
+    sh_start_dbus_in_chroot
+  fi
 	flatpak install -y org.gnome.Platform/x86_64/47 &>/dev/null
 
 	# Configure Nautilus
@@ -206,7 +226,6 @@ EOF
 		fi
 	fi
 
-
 	# Install local Flatpak applications
 	msg "Installing local Flatpak apps..."
 	flatpak_dir="/etc/skel/dotfiles/flatpak"
@@ -215,7 +234,7 @@ EOF
 		if [[ -f "$flatpak_file" ]]; then
 			#			sudo -u "$user" bash -c "flatpak install --user -y '$flatpak_file'" &>/dev/null
 			#su - "$user" -c "flatpak install --user -y '$flatpak_file'" &>/dev/null
-			flatpak install -y '$flatpak_file'" &>/dev/null
+			flatpak install -y "$flatpak_file" &>/dev/null
 			msg ":: com.ml4w.${app}.flatpak installed"
 		else
 			msg "${yellow}Warning: $flatpak_file not found, skipping...${reset}"
