@@ -32,7 +32,8 @@
 Current=sequoia
 
 # Cursor theme used in the greeter
-#CursorTheme=
+CursorTheme=Bibata-Modern-Ice
+CursorSize=24
 
 # Number of users to use as threshold
 # above which avatars are disabled

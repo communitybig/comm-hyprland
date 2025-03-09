@@ -139,17 +139,26 @@ EOF
 	chown -R sddm:sddm /var/lib/sddm >/dev/null
 
 	msg "Checking if /etc/sddm.conf already exists..."
-
+	#Change SDDM config
 	if [[ -f /etc/sddm.conf ]]; then
 		msg "Existing /etc/sddm.conf found. Creating a backup at /etc/sddm.conf.bak..."
-		mv /etc/sddm.conf /etc/sddm.conf.bak
+		mv -f /etc/sddm.conf /etc/sddm.conf.bak >/dev/null
 		msg "Applying new SDDM configuration..."
-		mv /etc/sddm.conf.pacnew /etc/sddm.conf
+		mv -f /etc/sddm.conf.pacnew /etc/sddm.conf >/dev/null
 	elif [[ -f /etc/sddm.conf.pacnew ]]; then
 		msg "No existing SDDM configuration found. Using default settings..."
-		mv /etc/sddm.conf.pacnew /etc/sddm.conf
+		mv -f /etc/sddm.conf.pacnew /etc/sddm.conf >/dev/null
 	fi
-
+	# Change SDDM default Cursor
+	if [[ -f /usr/share/icons/default/index.theme ]]; then
+		msg "Found existing cursor configuration at /usr/share/icons/default/index.theme. Creating a backup at /usr/share/icons/default/index.theme.bak..."
+		mv /usr/share/icons/default/index.theme /usr/share/icons/default/index.theme.bak >/dev/null
+		msg "Applying new mouse cursor configuration..."
+		mv /usr/share/icons/default/index.theme.pacnew /usr/share/icons/default/index.theme >/dev/null
+	elif [[ -f /usr/share/icons/default/index.theme.pacnew ]]; then
+		msg "No existing cursor configuration found. Applying default settings..."
+		mv /usr/share/icons/default/index.theme.pacnew /usr/share/icons/default/index.theme >/dev/null
+	fi
 	# Configure dotfiles and user settings
 	msg "Setting up dotfiles symlinks..."
 	user=$(awk -F: '$3 >= 1000 && $3 < 65000 { print $1; exit }' /etc/passwd)
@@ -304,7 +313,10 @@ post_remove() {
 		sudo -u "$user" bash -c "source $user_home/.bashrc" >/dev/null
 	fi
 	msg "Restoring files from SDDM..."
-	mv -f /etc/sddm.conf.bak /etc/sddm.conf
+	mv -f /etc/sddm.conf.bak /etc/sddm.conf >/dev/null
+	
+	msg "Restoring Cursor Theme..."
+	mv -f /usr/share/icons/default/index.theme.bak /usr/share/icons/default/index.theme  >/dev/null	
 
 	msg "Symlinks removed, backups restored, and .bashrc reloaded for user: $user!"
 }
