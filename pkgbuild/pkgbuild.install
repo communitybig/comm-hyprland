@@ -179,8 +179,7 @@ EOF
 	for app in calendar welcome settings sidebar; do
 		flatpak_file="$flatpak_dir/com.ml4w.${app}.flatpak"
 		if [[ -f "$flatpak_file" ]]; then
-			#sudo -u "$user" bash -c "flatpak install --user -y '$flatpak_file'" &>/dev/null
-			sudo -u "$user" bash -c "flatpak install --user -y '$flatpak_file'"
+			sudo -u "$user" bash -c "flatpak install --user -y '$flatpak_file'" &>/dev/null
 			msg ":: com.ml4w.${app}.flatpak installed"
 		else
 			msg "${yellow}Warning: $flatpak_file not found, skipping...${reset}"
