@@ -23,6 +23,12 @@ depends=(
 optdepends=(
 	auto-tweaks-browser
 	comm-base-config
+	evince
+	eog
+	papers
+	totem
+	amberol
+	p7zip
 	go
 	base-devel
 	btop
@@ -68,7 +74,6 @@ optdepends=(
 	wlogout
 	pinta
 	grimblast-git
-	#bibata-cursor-theme-bin
 	bibata-cursor-theme
 	pacseek
 	otf-font-awesome
@@ -82,6 +87,10 @@ optdepends=(
 	firefox
 	nautilus
 	nautilus-open-any-terminal
+	nautilus-admin
+	nautilus-empty-file
+	nautilus-image-converter
+	nautilus-share
 	gnome-text-editor
 	gnome-calculator
 	loupe
@@ -129,12 +138,6 @@ optdepends=(
 	sysstat
 	#jack2
 	#lib32-jack2
-	#blueman                # Bluetooth support
-	#xfce4-taskmanager      # Task manager
-	#xfce4-screenshooter    # Screenshot tool
-	#thunar-archive-plugin  # Archive support for Thunar
-	#xfce4-battery-plugin   # Battery monitor
-	#xfce4-weather-plugin   # Weather plugin
 )
 
 if [ -e "${pkgname}.install" ]; then

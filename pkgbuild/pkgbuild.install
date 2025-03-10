@@ -37,16 +37,16 @@ sh_load_optdepends() {
 }
 
 sh_start_dbus_in_chroot() {
-	# Verifica se o D-Bus já está em execução
+	# Check if D-Bus is already running
 	if ! pgrep -x "dbus-daemon" >/dev/null; then
-		# Cria o diretório para o socket do D-Bus
+		# Creates the directory for the D-Bus socket
 		mkdir -p /run/dbus
 		chmod 755 /run/dbus
 
-		# Inicia o D-Bus
+		# Start the D-Bus
 		dbus-daemon --system --fork
 
-		# Configura as variáveis de ambiente
+		# Set environment variables
 		export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
 		export DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
 	fi
@@ -194,7 +194,7 @@ EOF
 	chown -h "$user:$user" "$user_home/.bashrc" "$user_home/.gtkrc-2.0" "$user_home/.Xresources" >/dev/null
 
 	msg "Creating symlinks for configuration directories..."
-	config_dirs=(bashrc dunst fastfetch gtk-3.0 gtk-4.0 hypr kitty ml4w nvim nwg-dock-hyprland ohmyposh qt6ct rofi swaync vim wal waybar waypaper wlogout xsettingsd)
+	config_dirs=(mimeapps.list bashrc dunst fastfetch gtk-3.0 gtk-4.0 hypr kitty ml4w nvim nwg-dock-hyprland ohmyposh qt6ct rofi swaync vim wal waybar waypaper wlogout xsettingsd)
 	for dir in "${config_dirs[@]}"; do
 		if [[ -e "$user_home/.config/$dir" ]] && [[ ! -L "$user_home/.config/$dir" ]]; then
 			msg "Backing up existing ~/.config/$dir..."
@@ -299,7 +299,7 @@ post_remove() {
 	done
 	.bashrc
 	# Restore configuration directories
-	config_dirs=(bashrc dunst fastfetch gtk-3.0 gtk-4.0 hypr kitty ml4w nvim nwg-dock-hyprland ohmyposh qt6ct rofi swaync vim wal waybar waypaper wlogout xsettingsd)
+	config_dirs=(mimeapps.list bashrc dunst fastfetch gtk-3.0 gtk-4.0 hypr kitty ml4w nvim nwg-dock-hyprland ohmyposh qt6ct rofi swaync vim wal waybar waypaper wlogout xsettingsd)
 	for dir in "${config_dirs[@]}"; do
 		if [[ -L "$user_home/.config/$dir" ]]; then
 			rm "$user_home/.config/$dir" >/dev/null
