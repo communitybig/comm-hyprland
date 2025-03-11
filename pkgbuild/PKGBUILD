@@ -63,7 +63,7 @@ optdepends=(
 	rofi-wayland
 	polkit-gnome
 	polkit
-	meld
+	#meld
 	zsh
 	zsh-completions
 	fzf

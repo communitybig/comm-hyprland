@@ -268,14 +268,6 @@ EOF
 	msg "Removing Hyprland-UWSM entry from SDDM..."
 	rm -f /usr/share/wayland-sessions/hyprland-uwsm.desktop &>/dev/null
 
-	#Fix Dark Theme meld
-	 
-    su - "$user" -c "
-        export DISPLAY=:0;
-        export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u "$user")/bus;
-        gsettings set org.gnome.meld prefer-dark-theme true;
-    "	
-
 	if ! $IS_UPGRADE; then
 		msg "Installation complete. Rebooting in 10 seconds..."
 		# Countdown before reboot
