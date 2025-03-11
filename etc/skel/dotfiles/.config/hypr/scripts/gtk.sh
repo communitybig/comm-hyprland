@@ -51,3 +51,6 @@ fi
 gsettings set com.github.stunkymonkey.nautilus-open-any-terminal terminal "$terminal"
 gsettings set com.github.stunkymonkey.nautilus-open-any-terminal use-generic-terminal-name "true"
 gsettings set com.github.stunkymonkey.nautilus-open-any-terminal keybindings "<Ctrl><Alt>t"
+
+# Fix Set MELD Theme
+gsettings set org.gnome.meld prefer-dark-theme true
