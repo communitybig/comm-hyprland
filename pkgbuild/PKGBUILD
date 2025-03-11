@@ -63,6 +63,7 @@ optdepends=(
 	rofi-wayland
 	polkit-gnome
 	polkit
+	meld
 	zsh
 	zsh-completions
 	fzf
@@ -80,6 +81,7 @@ optdepends=(
 	ttf-fira-sans
 	ttf-fira-code
 	ttf-firacode-nerd
+	ttf-hack-nerd
 	ttf-dejavu
 	oh-my-posh-bin
 	checkupdates-with-aur
