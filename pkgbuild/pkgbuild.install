@@ -195,12 +195,16 @@ EOF
 
 	msg "Creating symlinks for configuration directories..."
 	config_dirs=(mimeapps.list bashrc dunst fastfetch gtk-3.0 gtk-4.0 hypr kitty ml4w nvim nwg-dock-hyprland ohmyposh qt6ct rofi swaync vim wal waybar waypaper wlogout xsettingsd)
+
 	for dir in "${config_dirs[@]}"; do
-		if [[ -e "$user_home/.config/$dir" ]] && [[ ! -L "$user_home/.config/$dir" ]]; then
+		if [[ -e "$user_home/.config/$dir" && ! -L "$user_home/.config/$dir" ]]; then
 			msg "Backing up existing ~/.config/$dir..."
-			mv "$user_home/.config/$dir" "$user_home/.backup/$dir" >/dev/null
+			mv "$user_home/.config/$dir" "$user_home/.backup/$dir" &>/dev/null
 		fi
-		ln -sf "$dotfiles_dir/.config/$dir" "$user_home/.config/$dir" >/dev/null
+		if [[ ! -e "$user_home/.config/$dir" ]]; then
+			msg "Creating symlink for ~/.config/$dir..."
+			ln -sf "$dotfiles_dir/.config/$dir" "$user_home/.config/$dir" &>/dev/null
+		fi
 	done
 	chown -hR "$user:$user" "$user_home/.config/" >/dev/null
 
