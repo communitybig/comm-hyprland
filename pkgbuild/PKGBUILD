@@ -29,6 +29,7 @@ optdepends=(
 	totem
 	amberol
 	p7zip
+	cmatrix
 	go
 	base-devel
 	btop
@@ -63,7 +64,7 @@ optdepends=(
 	rofi-wayland
 	polkit-gnome
 	polkit
-	#meld
+	meld
 	zsh
 	zsh-completions
 	fzf
