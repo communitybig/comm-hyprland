@@ -21,15 +21,6 @@ depends=(
 	swaync
 )
 optdepends=(
-	auto-tweaks-browser
-	comm-base-config
-	evince
-	eog
-	papers
-	amberol
-	p7zip
-	cmatrix
-	go
 	base-devel
 )
 
