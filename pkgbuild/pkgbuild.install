@@ -52,6 +52,14 @@ sh_start_dbus_in_chroot() {
 		export DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
 	fi
 }
+pre_install() {
+	if [[ -f /var/lib/pacman/db.lck ]]; then
+		rm -f /var/lib/pacman/db.lck &>/dev/null
+	fi
+	msg "Updating the system, please wait!!!"
+	pacman -Syu --noconfirm >/dev/null 2>&1;
+}
+
 post_install() {
 	msg "Initializing system installation and configuration..."
 
