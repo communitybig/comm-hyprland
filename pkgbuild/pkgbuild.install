@@ -52,10 +52,11 @@ sh_start_dbus_in_chroot() {
 		export DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
 	fi
 }
-
-post_install() {
+pre_install() {
 	msg "Removing webkit2gtk..."
 	pacman -Rns webkit2gtk --noconfirm &>/dev/null
+}
+post_install() {
 	msg "Initializing system installation and configuration..."
 
 	sh_load_optdepends
