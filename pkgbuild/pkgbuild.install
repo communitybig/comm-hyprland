@@ -5,19 +5,20 @@ export TERM=${TERM:-xterm}
 export TERM=${TERM:-xterm-256color}
 
 # Defining color variables (bold only)
-export black="\033[1;30m"
-export red="\033[1;31m"
-export green="\033[1;32m"
-export yellow="\033[1;33m"
-export blue="\033[1;34m"
-export magenta="\033[1;35m"
-export cyan="\033[1;36m"
-export white="\033[1;37m"
+declare black="\033[1;30m"
+declare red="\033[1;31m"
+declare green="\033[1;32m"
+declare yellow="\033[1;33m"
+declare blue="\033[1;34m"
+declare magenta="\033[1;35m"
+declare cyan="\033[1;36m"
+declare white="\033[1;37m"
 
 # Setting variables for bold and reset
-export bold="\033[1m"
-export reset="\033[0m"
-export pkgname=comm-hyprland
+declare bold="\033[1m"
+declare reset="\033[0m"
+declare WM='hyprland'
+declare pkgname=comm-"${WM}"
 declare IS_UPGRADE=false
 
 msg() {
@@ -262,7 +263,10 @@ EOF
 
 			msg "Configuring GRUB..."
 			# Change GRUB config
-			sed -i 's|^GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT="splash plymouth.enable=1 loglevel=4 libata.noacpi=1 acpi=force apm=power-off nowatchdog tsc=nowatchdog cryptomgr.notests no_timer_check rcupdate.rcu_expedited=1 intel_pstate=active amd_pstate=active cpuidle.governor=teo split_lock_detect=off clearcpuid=514 transparent_hugepage=never skew_tick=1 intremap=off nosoftlockup audit=0 nomce systemd.show_status=auto rd.udev.log_level=3 apparmor=1 security=apparmor vconsole.font=Uni2-Fixed16 intel_iommu=on amd_iommu=on tdx=on nvme_load=yes nouveau.modeset=1 i915.modeset=1 amdgpu.modeset=1 radeon.si_support=0 radeon.cik_support=0 amdgpu.si_support=1 amdgpu.cik_support=1 nvidia.modeset=1 nvidia_drm.modeset=1 DEEPIN_GFXMODE="|' /etc/default/grub >/dev/null
+			if ! grep -qi "${WM}" /etc/default/grub; then
+				sed -i "s/^GRUB_DISTRIBUTOR=\"\(.*\)\"/GRUB_DISTRIBUTOR=\"\1 ${WM^}\"/" /etc/default/grub
+			fi
+			sed -i 's|^GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT="quiet splash plymouth.enable=1 loglevel=4 libata.noacpi=1 acpi=force apm=power-off nowatchdog tsc=nowatchdog cryptomgr.notests no_timer_check rcupdate.rcu_expedited=1 intel_pstate=active amd_pstate=active cpuidle.governor=teo split_lock_detect=off clearcpuid=514 transparent_hugepage=never skew_tick=1 intremap=off nosoftlockup audit=0 nomce systemd.show_status=auto rd.udev.log_level=3 apparmor=1 security=apparmor vconsole.font=Uni2-Fixed16 intel_iommu=on amd_iommu=on tdx=on nvme_load=yes nouveau.modeset=1 i915.modeset=1 amdgpu.modeset=1 radeon.si_support=0 radeon.cik_support=0 amdgpu.si_support=1 amdgpu.cik_support=1 nvidia.modeset=1 nvidia_drm.modeset=1 DEEPIN_GFXMODE="|' /etc/default/grub 1>/dev/null
 
 			msg "Generating GRUB configuration files..."
 			update-grub &>/dev/null
