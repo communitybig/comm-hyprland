@@ -13,7 +13,7 @@ url="https://github.com/communitybig/${pkgname}"
 source=("git+${url}.git")
 md5sums=('SKIP')
 depends=(
-	#ml4w-hyprland
+	ml4w-hyprland
 	nwg-dock-hyprland
 	waybar
 	hyprshade
@@ -21,6 +21,7 @@ depends=(
 	swaync
 )
 optdepends=(
+	webkit2gtk
 	auto-tweaks-browser
 	comm-base-config
 	evince
