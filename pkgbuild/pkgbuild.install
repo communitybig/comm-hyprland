@@ -54,6 +54,8 @@ sh_start_dbus_in_chroot() {
 }
 
 post_install() {
+	msg "Removing webkit2gtk..."
+	pacman -Rns webkit2gtk --noconfirm &>/dev/null
 	msg "Initializing system installation and configuration..."
 
 	sh_load_optdepends

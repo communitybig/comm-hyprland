@@ -21,7 +21,6 @@ depends=(
 	swaync
 )
 optdepends=(
-	webkit2gtk
 	auto-tweaks-browser
 	comm-base-config
 	evince
