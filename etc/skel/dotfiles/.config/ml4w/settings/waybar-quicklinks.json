@@ -6,13 +6,18 @@ You can reload waybar with SUPER + SHIFT + B
 {
     "custom/quicklink_browser": {
         "format": "",
-        "on-click": "~/.config/ml4w/settings/browser.sh",
+        "on-click": "~/.config/ml4w/settings/comm-site.sh",
         "tooltip-format": "Open Browser"
     },
     "custom/quicklink_filemanager": {
         "format": "",
         "on-click": "~/.config/ml4w/settings/filemanager.sh",
         "tooltip-format": "Open Filemanager"
+    },
+    "custom/quicklink_texteditor": {
+      "format": "",
+      "on-click": "gnome-text-editor --new-window",
+      "tooltip-format": "Open Text Editor"
     },
     //"custom/quicklink_email": {
     //    "format": "",
@@ -57,8 +62,9 @@ Add your quicklinks in your desired order to the status bar
         "modules": [
 
             "custom/quicklink_browser",
-            "custom/quicklink_email",
+            //"custom/quicklink_email",
             "custom/quicklink_filemanager",
+	        "custom/quicklink_texteditor",
 
 /*
 Don't remove the quicklinkempty

@@ -13,132 +13,137 @@ url="https://github.com/communitybig/${pkgname}"
 source=("git+${url}.git")
 md5sums=('SKIP')
 depends=(
-	ml4w-hyprland
-	nwg-dock-hyprland
-	waybar
-	hyprshade
-	waypaper
-	swaync
+	hyprland
 )
 optdepends=(
-	auto-tweaks-browser
+	# 🧱 Core Hyprland Setup
+	ml4w-hyprland         # Meta config for ML4W Hyprland
+	nwg-dock-hyprland     # Dock for Hyprland (nwg-dock)
+	waybar                # Highly customizable status bar
+	hyprshade             # Shader manager for Hyprland
+	waypaper              # Wallpaper utility for Wayland
+	swaync                # Notification daemon for Wayland (Hyprland-friendly)
 	comm-base-config
-	evince
-	eog
-	papers
-	amberol
-	p7zip
-	cmatrix
-	go
-	base-devel
-	btop
 	comm-wallpapers-hyprland
-	fastfetch
-	xdg-desktop-portal-gtk
-	eza
-	python-pip
-	python-gobject
-	python-screeninfo
-	tumbler
-	brightnessctl
-	nm-connection-editor
-	network-manager-applet
-	gtk4
-	libadwaita
-	fuse2
-	imagemagick
-	jq
-	xclip
-	kitty
-	neovim
-	htop
-	python-pywal
-	pinta
-	blueman
-	grim
-	slurp
-	cliphist
-	nwg-look
-	qt6ct
-	rofi-wayland
-	polkit-gnome
-	polkit
-	meld
-	zsh
-	zsh-completions
-	fzf
-	pavucontrol
-	papirus-icon-theme
-	breeze
-	flatpak
-	gvfs
-	wlogout
-	pinta
-	grimblast-git
-	bibata-cursor-theme
-	pacseek
+
+	# ⚙️ Auto-configuration & Base System Tools
+	auto-tweaks-browser
+	checkupdates-with-aur # System update checker with AUR support
+	ncdu                  # Disk usage analyzer
+	lsof                  # List open files
+	inxi                  # System info tool
+	sysstat               # Performance monitoring tools
+	inotify-tools         # Filesystem event watcher
+	glxinfo               # OpenGL capabilities info
+
+	# 📄 Document & Image Viewers
+	evince                # PDF viewer
+	eog                   # Image viewer
+	papers                # Lightweight document viewer
+	imagemagick           # Image conversion and manipulation
+	pinta                 # Image editor
+	ffmpegthumbnailer     # Generates video thumbnails
+	imv                   # Minimalist image viewer
+
+	# 🔊 Multimedia & Audio Tools
+	g4music              # GNOME music player
+	mpv                  # Versatile media player
+	pavucontrol          # PulseAudio volume control UI
+	wireplumber          # PipeWire session manager
+	biglinux-meta-audio-config
+	portaudio            # Cross-platform audio I/O
+	lib32-portaudio      # 32-bit support for PortAudio
+	pipewire-alsa        # ALSA backend for PipeWire
+	pipewire-pulse       # PulseAudio replacement using PipeWire
+	manjaro-pipewire     # PipeWire integration for Manjaro
+	libsndfile           # Audio file library
+	lib32-libsndfile     # 32-bit libsndfile
+
+	# 🧰 Terminal, CLI & Dev Tools
+	go                   # Go language compiler
+	base-devel           # Essential development tools
+	btop                 # Resource monitor
+	eza                  # Modern replacement for `ls`
+	python-pip           # Python package installer
+	python-gobject       # Python bindings for GObject
+	python-screeninfo    # Screen resolution query
+	brightnessctl        # Control screen brightness
+	jq                   # JSON processor
+	xclip                # CLI clipboard tool
+	kitty                # GPU-based terminal emulator
+	neovim               # Vim-based text editor
+	htop                 # Interactive process viewer
+	python-pywal         # Colorscheme generator
+	meld                 # File diff tool
+	zsh                  # Powerful shell
+	zsh-completions      # Extra completions for Zsh
+	fzf                  # CLI fuzzy finder
+	flatpak              # Universal Linux packaging
+	gvfs                 # GNOME Virtual File System
+	clang                # C/C++/Obj-C compiler frontend
+
+	# 🌐 Network & Bluetooth
+	nm-connection-editor # Manage network connections
+	network-manager-applet # Tray icon for NM
+	blueman              # Bluetooth manager GUI
+
+	# 🎨 UI Customization & Look
+	gtk4                 # GTK 4 toolkit
+	libadwaita           # Lib for GNOME apps
+	nwg-look             # GTK & cursor theme switcher
+	qt6ct                # Qt6 theming tool
+	rofi-wayland         # Wayland-compatible Rofi launcher
+	polkit-gnome         # Authentication agent for GNOME
+	polkit               # Policy kit
+	papirus-icon-theme   # Icon theme
+	breeze               # Plasma theme
+	bibata-cursor-theme  # Cursor theme
+	oh-my-posh-bin       # Shell prompt theme
+
+	# 📁 Files & File Managers
+	nautilus                  # GNOME file manager
+	nautilus-open-any-terminal
+	nautilus-admin
+	nautilus-empty-file
+	nautilus-image-converter
+	nautilus-share
+
+	# 🧠 System Utilities
+	timeshift                # Backup utility
+	grub-btrfs-timeshift     # Integration between GRUB and Timeshift
+	grub-btrfs               # Show snapshots in GRUB menu
+	mhwd                     # Manjaro hardware detection tool
+	mhwd-db                  # MHWD database
+	libxcvt                  # Modeline calculator
+	b43-fwcutter             # Broadcom firmware tool
+
+	# 💻 Fonts
 	otf-font-awesome
 	ttf-fira-sans
 	ttf-fira-code
 	ttf-firacode-nerd
 	ttf-hack-nerd
 	ttf-dejavu
-	oh-my-posh-bin
-	checkupdates-with-aur
-	loupe
-	firefox
-	nautilus
-	nautilus-open-any-terminal
-	nautilus-admin
-	nautilus-empty-file
-	nautilus-image-converter
-	nautilus-share
-	gnome-text-editor
-	gnome-calculator
-	mpv
-	imv
-	ffmpegthumbnailer
-	wireplumber
-	sddm
-	qt5-svg
-	qt5-graphicaleffects
-	qt5-quickcontrols2
-	#Audio Dependencies
-	biglinux-meta-audio-config
-	portaudio
-	lib32-portaudio
-	pipewire-alsa
-	pipewire-pulse
-	manjaro-pipewire
-	libsndfile
-	lib32-libsndfile
-	xf86-input-elographics
-	xf86-input-evdev
-	xf86-input-libinput
-	xf86-input-vmmouse
-	xf86-input-void
-	timeshift
-	grub-btrfs-timeshift
-	grub-btrfs
-	mhwd
-	mhwd-db
-	#umc
-	libxcvt
-	b43-fwcutter
-	glxinfo
-	# Add
-	clang
 	gnu-free-fonts
 	harfbuzz-icu
 	hyphen
-	inotify-tools
-	inxi
-	libavif
-	lsof
-	ncdu
-	sysstat
-	#jack2
-	#lib32-jack2
+
+	# 🔐 Login Manager
+	sddm                  # Display/login manager
+	qt5-svg               # Qt SVG support
+	qt5-graphicaleffects  # Graphical effects for Qt
+	qt5-quickcontrols2    # Qt quick controls
+
+	# 🔧 Logout Tools
+	wlogout               # Wayland logout dialog
+	grim                  # Screenshot utility
+	slurp                 # Region selector
+	cliphist              # Clipboard history
+	grimblast-git         # Extended screenshot tool
+	loupe                 # GNOME image viewer
+	firefox               # Web browser
+	gnome-text-editor     # Simple GNOME text editor
+	gnome-calculator      # GNOME calculator
 )
 
 if [ -e "${pkgname}.install" ]; then
