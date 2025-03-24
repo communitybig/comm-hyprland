@@ -15,10 +15,15 @@ You can reload waybar with SUPER + SHIFT + B
         "tooltip-format": "Open Filemanager"
     },
     "custom/quicklink_texteditor": {
-      "format": "",
+      "format": "  ",
       "on-click": "gnome-text-editor --new-window",
       "tooltip-format": "Open Text Editor"
     },
+    "custom/quicklink_kitty": {
+        "format": " ",
+        "on-click": "kitty",
+        "tooltip-format": "Open Terminal"
+      },    
     //"custom/quicklink_email": {
     //    "format": "",
     //    "on-click": "~/.config/ml4w/settings/email.sh",
@@ -65,6 +70,7 @@ Add your quicklinks in your desired order to the status bar
             //"custom/quicklink_email",
             "custom/quicklink_filemanager",
 	        "custom/quicklink_texteditor",
+            "custom/quicklink_kitty",
 
 /*
 Don't remove the quicklinkempty

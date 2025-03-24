@@ -1,0 +1,185 @@
+# Maintainer: Leonardo Berbert <leo4berbert@gmail.com>
+# Contributor: Vilmar Catafesta <vcatafesta@gmail.com>
+# Contributor: Stephan Raabe
+# Upstream: https://github.com/mylinuxforwork/dotfiles
+
+pkgname=comm-hyprland
+pkgdesc="Meta package for Hyprland"
+pkgver=$(date +%Y%m%d)
+pkgrel=$(date +%H%M)
+arch=('any')
+license=('MIT')
+url="https://github.com/communitybig/${pkgname}"
+source=("git+${url}.git")
+md5sums=('SKIP')
+depends=(
+	hyprland
+)
+optdepends=(
+	# 🧱 Core Hyprland Setup
+	ml4w-hyprland         # Meta config for ML4W Hyprland
+	nwg-dock-hyprland     # Dock for Hyprland (nwg-dock)
+	waybar                # Highly customizable status bar
+	hyprshade             # Shader manager for Hyprland
+	waypaper              # Wallpaper utility for Wayland
+	swaync                # Notification daemon for Wayland (Hyprland-friendly)
+	comm-base-config
+	comm-wallpapers-hyprland
+
+	# ⚙️ Auto-configuration & Base System Tools
+	auto-tweaks-browser
+	checkupdates-with-aur # System update checker with AUR support
+	ncdu                  # Disk usage analyzer
+	lsof                  # List open files
+	inxi                  # System info tool
+	sysstat               # Performance monitoring tools
+	inotify-tools         # Filesystem event watcher
+	glxinfo               # OpenGL capabilities info
+
+	# 📄 Document & Image Viewers
+	evince                # PDF viewer
+	eog                   # Image viewer
+	papers                # Lightweight document viewer
+	imagemagick           # Image conversion and manipulation
+	pinta                 # Image editor
+	ffmpegthumbnailer     # Generates video thumbnails
+	imv                   # Minimalist image viewer
+
+	# 🔊 Multimedia & Audio Tools
+	g4music              # GNOME music player
+	mpv                  # Versatile media player
+	pavucontrol          # PulseAudio volume control UI
+	wireplumber          # PipeWire session manager
+	biglinux-meta-audio-config
+	portaudio            # Cross-platform audio I/O
+	lib32-portaudio      # 32-bit support for PortAudio
+	pipewire-alsa        # ALSA backend for PipeWire
+	pipewire-pulse       # PulseAudio replacement using PipeWire
+	manjaro-pipewire     # PipeWire integration for Manjaro
+	libsndfile           # Audio file library
+	lib32-libsndfile     # 32-bit libsndfile
+
+	# 🧰 Terminal, CLI & Dev Tools
+	go                   # Go language compiler
+	base-devel           # Essential development tools
+	btop                 # Resource monitor
+	eza                  # Modern replacement for `ls`
+	python-pip           # Python package installer
+	python-gobject       # Python bindings for GObject
+	python-screeninfo    # Screen resolution query
+	brightnessctl        # Control screen brightness
+	jq                   # JSON processor
+	xclip                # CLI clipboard tool
+	kitty                # GPU-based terminal emulator
+	neovim               # Vim-based text editor
+	htop                 # Interactive process viewer
+	python-pywal         # Colorscheme generator
+	meld                 # File diff tool
+	zsh                  # Powerful shell
+	zsh-completions      # Extra completions for Zsh
+	fzf                  # CLI fuzzy finder
+	flatpak              # Universal Linux packaging
+	gvfs                 # GNOME Virtual File System
+	clang                # C/C++/Obj-C compiler frontend
+
+	# 🌐 Network & Bluetooth
+	nm-connection-editor # Manage network connections
+	network-manager-applet # Tray icon for NM
+	blueman              # Bluetooth manager GUI
+
+	# 🎨 UI Customization & Look
+	gtk4                 # GTK 4 toolkit
+	libadwaita           # Lib for GNOME apps
+	nwg-look             # GTK & cursor theme switcher
+	qt6ct                # Qt6 theming tool
+	rofi-wayland         # Wayland-compatible Rofi launcher
+	polkit-gnome         # Authentication agent for GNOME
+	polkit               # Policy kit
+	papirus-icon-theme   # Icon theme
+	breeze               # Plasma theme
+	bibata-cursor-theme  # Cursor theme
+	oh-my-posh-bin       # Shell prompt theme
+
+	# 📁 Files & File Managers
+	nautilus                  # GNOME file manager
+	nautilus-open-any-terminal
+	nautilus-admin
+	nautilus-empty-file
+	nautilus-image-converter
+	nautilus-share
+
+	# 🧠 System Utilities
+	timeshift                # Backup utility
+	grub-btrfs-timeshift     # Integration between GRUB and Timeshift
+	grub-btrfs               # Show snapshots in GRUB menu
+	mhwd                     # Manjaro hardware detection tool
+	mhwd-db                  # MHWD database
+	libxcvt                  # Modeline calculator
+	b43-fwcutter             # Broadcom firmware tool
+
+	# 💻 Fonts
+	otf-font-awesome
+	ttf-fira-sans
+	ttf-fira-code
+	ttf-firacode-nerd
+	ttf-hack-nerd
+	ttf-dejavu
+	gnu-free-fonts
+	harfbuzz-icu
+	hyphen
+
+	# 🔐 Login Manager
+	sddm                  # Display/login manager
+	qt5-svg               # Qt SVG support
+	qt5-graphicaleffects  # Graphical effects for Qt
+	qt5-quickcontrols2    # Qt quick controls
+
+	# 🔧 Logout Tools
+	wlogout               # Wayland logout dialog
+	grim                  # Screenshot utility
+	slurp                 # Region selector
+	cliphist              # Clipboard history
+	grimblast-git         # Extended screenshot tool
+	loupe                 # GNOME image viewer
+	firefox               # Web browser
+	gnome-text-editor     # Simple GNOME text editor
+	gnome-calculator      # GNOME calculator
+)
+
+if [ -e "${pkgname}.install" ]; then
+	install=${pkgname}.install
+elif [ -e "pkgbuild.install" ]; then
+	install=pkgbuild.install
+fi
+
+package() {
+	cd "${srcdir}/${pkgname}"
+
+  mkdir -p "${pkgdir}/usr/share/${pkgname}"
+  printf "%s\n" "${optdepends[@]}" > "${pkgdir}/usr/share/${pkgname}/optdepends"
+
+	# Determine the correct source directory
+	if [ -d "${pkgname}" ]; then
+		srcdir="${srcdir}/${pkgname}/${pkgname}"
+	else
+		srcdir="${srcdir}/${pkgname}"
+	fi
+
+	# Install files
+	local dirs=("usr" "etc" "opt")
+	for dir in "${dirs[@]}"; do
+		if [ -d "${srcdir}/${dir}" ]; then
+			cp -a "${srcdir}/${dir}" "${pkgdir}/"
+		fi
+	done
+
+	# Install license file if present
+	if [ -f "LICENSE" ]; then
+		install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+	fi
+
+	# Install documentation if present
+	if [ -f "README.md" ]; then
+		install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
+	fi
+}
