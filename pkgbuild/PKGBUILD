@@ -28,7 +28,7 @@ optdepends=(
   evince
   eog
   papers
-  amberol
+  g4music
   p7zip
   cmatrix
   go
