@@ -35,6 +35,7 @@ optdepends=(
   go
   base-devel
   btop
+  plymouth-theme-community
   comm-wallpapers-hyprland
   fastfetch
   xdg-desktop-portal-gtk
