@@ -106,10 +106,8 @@ post_install() {
 		install_packages "$KERNEL_PACKAGE" nvidia-utils nvidia-settings
 
 		msg "Blacklisting Nouveau..."
-		cat <<EOF | tee /etc/modprobe.d/nouveau.conf /etc/modprobe.d/blacklist.conf
-blacklist nouveau
-install nouveau /bin/true
-EOF
+		echo -e "blacklist nouveau\ninstall nouveau /bin/true" > /etc/modprobe.d/nouveau.conf    
+		echo -e "blacklist nouveau\ninstall nouveau /bin/true" > /etc/modprobe.d/blacklist.conf
 	elif grep -qiw "Intel" <<<"$GPU_INFO"; then
 		msg "Intel GPU detected! Installing drivers..."
 		install_packages vulkan-intel lib32-vulkan-intel
